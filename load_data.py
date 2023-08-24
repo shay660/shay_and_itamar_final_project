@@ -3,6 +3,7 @@ from typing import IO, Dict, List
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 
 def load_seq_data(samples_path: str, response_path: str, min_length: int,
@@ -27,7 +28,7 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
     # create dict. key is id, value is a dict where the key is k_mer and the
     # value is it's frequency in the id seq.
     k_mers_counter: Dict[str: Dict[str, int]] = {}
-    for line in f[2:]:
+    for line in tqdm(f[2:]):
         line = line.split()
         id, seq = line[0], line[1]
         k_mers_counter[id] = k_mers_count(seq, min_length, max_length,
