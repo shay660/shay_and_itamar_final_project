@@ -1,6 +1,6 @@
 from time import time
 
-from data import load_seq_data
+from load_data import load_seq_data
 
 
 if __name__ == '__main__':
