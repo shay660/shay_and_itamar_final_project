@@ -17,13 +17,6 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
     """
     f: list = open(samples_path, "r").readlines()
 
-    # make all the possible sequence in the length of 3-7 nt.
-    # characters = 'ATGC'
-    # all_sequences = []
-    # for length in range(min_length, max_length + 1):
-    #     sequences_of_length = [''.join(p) for p in
-    #                            itertools.product(characters, repeat=length)]
-    #     all_sequences.extend(sequences_of_length)
     # loads the responses vector
     response_vec = load_response(response_path)
     # create dict. key is id, value is a dict where the key is k_mer and the
@@ -44,10 +37,12 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
 
 def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
     """
-
-    :param seq:
-    :param k:
-    :return:
+    counts the number of times each k_mers in the length of min_length to
+    max_length in a sequence.
+    :param min_length: the min length of k_mer that is look for.
+    :param max_length: the max length of k_kmer that is look for.
+    :return: A dict which the key is the k_mer and the value is the number of
+    times that the k_mer is in the seq.
     """
     # Start with an empty dictionary
     counts = {}
@@ -67,9 +62,9 @@ def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
 
 def load_response(path: str) -> pd.DataFrame:
     """
-    load the respon
+    load the responses
     :param path:
-    :return:
+    :return: pandas DataFrame of the responses.
     """
     lines: List[str] = open(path, "r").readlines()
     # id_to_rate: Dict[str: float] = {}
