@@ -24,18 +24,20 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
         sequences_of_length = [''.join(p) for p in
                                itertools.product(characters, repeat=length)]
         all_sequences.extend(sequences_of_length)
-
+    # loads the responses vector
+    response_vec = load_response(response_path)
     # create dict. key is id, value is a dict where the key is k_mer and the
     # value is it's frequency in the id seq.
     k_mers_counter: Dict[str: Dict[str, int]] = {}
     for line in tqdm(f[2:]):
         line = line.split()
         id, seq = line[0], line[1]
-        k_mers_counter[id] = k_mers_count(seq, min_length, max_length,
-                                          all_sequences)
+        #checks if we have the response value for the id before loading it to the dataset
+        if id in response_vec.index.tolist():
+            k_mers_counter[id] = k_mers_count(seq, min_length, max_length,
+                                              all_sequences)
 
     samples = pd.DataFrame.from_dict(k_mers_counter, orient="index")
-    response_vec = load_response(response_path)
     df: pd.DataFrame = samples.join(response_vec, how="inner")
     return df
 
@@ -57,9 +59,6 @@ def k_mers_count(seq: str, min_length: int, max_length: int,
         for i in range(num_kmers):
             # Slice the string to get the kmer
             kmer = seq[i:i + k]
-            # # Add the kmer to the dictionary if it's not there
-            # if kmer not in counts:
-            #     counts[kmer] = 0
             # Increment the count for this kmer
             counts[kmer] += 1
     return counts
@@ -72,12 +71,19 @@ def load_response(path: str) -> pd.DataFrame:
     :return:
     """
     lines: List[str] = open(path, "r").readlines()
-    id_to_rate: Dict[str: float] = {}
+    # id_to_rate: Dict[str: float] = {}
+    # id_to_x0: Dict[str: float] = {}
+    id_dict ={}
     for line in lines[1:]:
         line = line.split()
-        id, deg_rate = line[0], line[1]
-        id_to_rate[id] = deg_rate
+        id, deg_rate, x0 = line[0], line[1], line[2]
+        # id_to_rate[id],id_to_x0[id] = deg_rate, x0
+        id_dict[id] = [deg_rate, x0]
 
-    df: pd.DataFrame = pd.DataFrame.from_dict(id_to_rate, orient="index")
-    df.columns =  ['degradation rate']
+
+    # rate_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_rate, orient="index")
+    # x0_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_x0, orient="index")
+    # df: pd.DataFrame = rate_df.join(x0_df, how= "inner")
+    df: pd.DataFrame = pd.DataFrame.from_dict(id_dict, orient="index")
+    df.columns = ['degradation rate', 'x0']
     return df
