@@ -18,12 +18,12 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
     f: list = open(samples_path, "r").readlines()
 
     # make all the possible sequence in the length of 3-7 nt.
-    characters = 'ATGC'
-    all_sequences = []
-    for length in range(min_length, max_length + 1):
-        sequences_of_length = [''.join(p) for p in
-                               itertools.product(characters, repeat=length)]
-        all_sequences.extend(sequences_of_length)
+    # characters = 'ATGC'
+    # all_sequences = []
+    # for length in range(min_length, max_length + 1):
+    #     sequences_of_length = [''.join(p) for p in
+    #                            itertools.product(characters, repeat=length)]
+    #     all_sequences.extend(sequences_of_length)
     # loads the responses vector
     response_vec = load_response(response_path)
     # create dict. key is id, value is a dict where the key is k_mer and the
@@ -34,16 +34,15 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
         id, seq = line[0], line[1]
         #checks if we have the response value for the id before loading it to the dataset
         if id in response_vec.index.tolist():
-            k_mers_counter[id] = k_mers_count(seq, min_length, max_length,
-                                              all_sequences)
+            k_mers_counter[id] = k_mers_count(seq, min_length, max_length)
 
     samples = pd.DataFrame.from_dict(k_mers_counter, orient="index")
+    samples.fillna(0, inplace=True)
     df: pd.DataFrame = samples.join(response_vec, how="inner")
     return df
 
 
-def k_mers_count(seq: str, min_length: int, max_length: int,
-                 all_sequences: List[str]) -> Dict[str, int]:
+def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
     """
 
     :param seq:
@@ -51,7 +50,7 @@ def k_mers_count(seq: str, min_length: int, max_length: int,
     :return:
     """
     # Start with an empty dictionary
-    counts = {seq: 0 for seq in all_sequences}
+    counts = {}
     for k in range(min_length, max_length + 1):
         # Calculate how many kmers of length k there are
         num_kmers = len(seq) - k + 1
@@ -60,6 +59,8 @@ def k_mers_count(seq: str, min_length: int, max_length: int,
             # Slice the string to get the kmer
             kmer = seq[i:i + k]
             # Increment the count for this kmer
+            if kmer not in counts:
+                counts[kmer] = 0
             counts[kmer] += 1
     return counts
 
