@@ -33,7 +33,7 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
         line = line.split()
         id, seq = line[0], line[1]
         #checks if we have the response value for the id before loading it to the dataset
-        if id in response_vec.index.tolist():
+        if id in response_vec.index.tolist() and float(response_vec.loc[id, 't0']) == 1:
             k_mers_counter[id] = k_mers_count(seq, min_length, max_length)
 
     samples = pd.DataFrame.from_dict(k_mers_counter, orient="index")
@@ -77,14 +77,15 @@ def load_response(path: str) -> pd.DataFrame:
     id_dict ={}
     for line in lines[1:]:
         line = line.split()
-        id, deg_rate, x0 = line[0], line[1], line[2]
+        print(line)
+        id, deg_rate, x0, t0 = line[0], line[1], line[2], line[3]
         # id_to_rate[id],id_to_x0[id] = deg_rate, x0
-        id_dict[id] = [deg_rate, x0]
+        id_dict[id] = [deg_rate, x0, t0]
 
 
     # rate_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_rate, orient="index")
     # x0_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_x0, orient="index")
     # df: pd.DataFrame = rate_df.join(x0_df, how= "inner")
     df: pd.DataFrame = pd.DataFrame.from_dict(id_dict, orient="index")
-    df.columns = ['degradation rate', 'x0']
+    df.columns = ['degradation rate', 'x0', 't0']
     return df
