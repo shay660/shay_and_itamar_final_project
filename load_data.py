@@ -36,7 +36,7 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
         if id in response_vec.index.tolist() and float(response_vec.loc[id, 't0']) == 1:
             k_mers_counter[id] = k_mers_count(seq, min_length, max_length)
 
-    samples = pd.DataFrame.from_dict(k_mers_counter, orient="index")
+    samples = pd.DataFrame.from_dict(k_mers_counter, orient="index", dtype=int)
     samples.fillna(0, inplace=True)
     df: pd.DataFrame = samples.join(response_vec, how="inner")
     return df
