@@ -1,13 +1,14 @@
 import itertools
-from typing import IO, Dict, List
+from typing import IO, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
+from pandas import DataFrame
 from tqdm import tqdm
 
 
 def load_seq_data(samples_path: str, response_path: str, min_length: int,
-                  max_length: int) -> pd.DataFrame:
+                  max_length: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     loads the data from a text file into data frame that count how many times
     each sequence in the length of 3-7 nucleotides is in each 3'URR.
@@ -18,17 +19,22 @@ def load_seq_data(samples_path: str, response_path: str, min_length: int,
     f: list = open(samples_path, "r").readlines()
 
     # loads the responses vector
-    response_vec = load_response(response_path)
+    early_onset_responses_vec, late_onset_responses_vec = load_response(response_path)
+
+    early_onset_matrix = matrix_generator(f, max_length, min_length, early_onset_responses_vec)
+    late_onset_matrix = matrix_generator(f, max_length, min_length, late_onset_responses_vec)
+    return early_onset_matrix, late_onset_matrix
+
+def matrix_generator(f, max_length, min_length, response_vec):
     # create dict. key is id, value is a dict where the key is k_mer and the
-    # value is it's frequency in the id seq.
+    # value is its frequency in the id seq.
     k_mers_counter: Dict[str: Dict[str, int]] = {}
     for line in tqdm(f[2:]):
         line = line.split()
         id, seq = line[0], line[1]
-        #checks if we have the response value for the id before loading it to the dataset
-        if id in response_vec.index.tolist() and float(response_vec.loc[id, 't0']) == 1:
+        # checks if we have the response value for the id before loading it to the dataset
+        if id in response_vec.index.tolist():
             k_mers_counter[id] = k_mers_count(seq, min_length, max_length)
-
     samples = pd.DataFrame.from_dict(k_mers_counter, orient="index", dtype=int)
     samples.fillna(0, inplace=True)
     df: pd.DataFrame = samples.join(response_vec, how="inner")
@@ -60,7 +66,7 @@ def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
     return counts
 
 
-def load_response(path: str) -> pd.DataFrame:
+def load_response(path: str) -> tuple[DataFrame, DataFrame]:
     """
     load the responses
     :param path:
@@ -69,18 +75,23 @@ def load_response(path: str) -> pd.DataFrame:
     lines: List[str] = open(path, "r").readlines()
     # id_to_rate: Dict[str: float] = {}
     # id_to_x0: Dict[str: float] = {}
-    id_dict ={}
+    early_onset_dict ={}
+    late_onset_dict = {}
     for line in lines[1:]:
         line = line.split()
-        print(line)
         id, deg_rate, x0, t0 = line[0], line[1], line[2], line[3]
         # id_to_rate[id],id_to_x0[id] = deg_rate, x0
-        id_dict[id] = [deg_rate, x0, t0]
-
+        if float(t0) == 1:
+            early_onset_dict[id] = [deg_rate, x0, t0]
+        else:
+            late_onset_dict[id] = [deg_rate, x0, t0]
 
     # rate_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_rate, orient="index")
     # x0_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_x0, orient="index")
     # df: pd.DataFrame = rate_df.join(x0_df, how= "inner")
-    df: pd.DataFrame = pd.DataFrame.from_dict(id_dict, orient="index")
-    df.columns = ['degradation rate', 'x0', 't0']
-    return df
+    early_onset_df: pd.DataFrame = pd.DataFrame.from_dict(early_onset_dict, orient="index")
+    late_onset_df: pd.DataFrame = pd.DataFrame.from_dict(late_onset_dict, orient="index")
+    early_onset_df.columns,late_onset_df.columns = ['degradation rate', 'x0', 't0'], ['degradation rate', 'x0', 't0']
+    return early_onset_df, late_onset_df
+
+

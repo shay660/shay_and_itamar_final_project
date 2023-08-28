@@ -11,11 +11,11 @@ from sklearn.model_selection import GridSearchCV
 
 if __name__ == '__main__':
     start = time()
-    df: pd.DataFrame = load_seq_data("./data/15k_samples_data.txt",
+    df: pd.DataFrame = load_seq_data("./data/1000_samples_data.txt",
                                      "./data/3U.models.3U.00A.seq1022_param.txt",
                                      3, 7)
     X_train, X_test, y_train, y_test = train_test_split(df.iloc[:, :-3],
-                                                        df.iloc[:, -3:-1],
+                                                        df.iloc[:, -3:],
                                                         test_size=0.1,
                                                         random_state=1)
 
