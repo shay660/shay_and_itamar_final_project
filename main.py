@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import pandas as pd
 
-from load_data import load_seq_data
+from load_data import load_seq_data, load_response
 from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
@@ -18,7 +18,7 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame):
                                                         random_state=1)
     lasso_model = Lasso(max_iter=5000)
     alphas: Dict[str, List[float]] = {'alpha': [0.001, 0.003, 0.005]}
-    grid_search = GridSearchCV(lasso_model, alphas, cv=5,
+    grid_search = GridSearchCV(lasso_model, alphas, cv=10,
                                scoring='neg_mean_squared_error').fit(X_train,
                                                                      y_train)
     best_alpha = grid_search.best_params_['alpha']
@@ -34,8 +34,6 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame):
     prediction = linear_reg_model.predict(X_test)
     mse = mean_squared_error(y_test, prediction)
     # r2 = r2_score(y_test, prediction)
-    end = time()
-    print(f"time = {end - start}")
     # print(lasso_model.coef_)
     print(f"MSE of the Linear regression = {mse}")
     # print(f"r2 of the Linear regression = {r2}")
@@ -43,17 +41,27 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame):
 
 if __name__ == '__main__':
     start = time()
-    # load data without poly(A)
-    early_onset_with_polyA, late_onset_with_polyA, early_responses_with_polyA, \
-        late_responses_with_polyA = load_seq_data("./data/1000_samples_data.txt",
-                                                  "./data/3U.models.3U.00A.seq1022_param.txt",
-                                                  3, 7)
-    # load data with poly(A)
-    # early_onset_without_polyA, late_onset_without_polyA, \
-    #     early_responses_without_polyA, late_responses_without_polyA = \
-    #     load_seq_data("./data/15k_samples_data.txt",
-    #                   "./data/3U.models.3U.40A.seq1022_param.txt", 3, 7)
+    # load responses vectors
+    early_responses_without_polyA, late_responses_without_polyA = load_response(
+        "./data/3U.models.3U.00A.seq1022_param.txt")  # load responses without
+    # polyA tail.
 
-    # TODO generated fitted models.
+    early_responses_with_polyA, late_responses_with_polyA = load_response(
+        "./data/3U.models.3U.40A.seq1022_param.txt")  # load responses with
+    # polyA tail.
 
-    model_generator(early_onset_with_polyA, early_responses_with_polyA)
+    # load samples
+    early_onset_samples_with_polyA, late_onset_with_polyA = load_seq_data(
+        "data/1000_samples_data.txt",
+        early_responses_with_polyA,
+        late_responses_with_polyA, 3, 7)
+    early_onset_samples_without_polyA, late_onset_without_polyA = load_seq_data(
+        "data/1000_samples_data.txt",
+        early_responses_without_polyA,
+        late_responses_without_polyA, 3, 7)
+
+    print(f"load data time = {time() - start}.3f")
+
+    model_generator(early_onset_samples_with_polyA, early_responses_with_polyA)
+    end = time()
+    print(f"time = {end - start}")

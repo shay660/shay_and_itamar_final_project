@@ -1,34 +1,37 @@
-import itertools
-from typing import IO, Dict, List, Tuple
-
+from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
 
 
-def load_seq_data(samples_path: str, response_path: str, min_length: int,
+def load_seq_data(samples_path: str, early_onset_responses: pd.DataFrame,
+                  late_onset_responses: pd.DataFrame, min_length: int,
                   max_length: int) -> Tuple[
-    pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    pd.DataFrame, pd.DataFrame]:  # pd.DataFrame, pd.DataFrame
     """
     loads the data from a text file into data frame that count how many times
     each sequence in the length of 3-7 nucleotides is in each 3'URR.
-    :param path: path to a text file
+    :param samples_path: path to a text file
+    :param early_onset_responses:
+    :param late_onset_responses:
+    :param min_length:
+    :param max_length:
     :return: data frame that count how many times each sequence in the length of
      3-7 nucleotides is in each 3'URR. The shape (n_genes, 4^3+4^4+4^5+4^6+4^7)
     """
     f: list = open(samples_path, "r").readlines()
 
     # loads the responses vector
-    early_onset_responses_vec, late_onset_responses_vec = load_response(
-        response_path)
+    # early_onset_responses, late_onset_responses = load_response(
+    #     response_path)
 
     early_onset_matrix = matrix_generator(f, max_length, min_length,
-                                          early_onset_responses_vec)
+                                          early_onset_responses)
     late_onset_matrix = matrix_generator(f, max_length, min_length,
-                                         late_onset_responses_vec)
-    return early_onset_matrix, late_onset_matrix, early_onset_responses_vec, \
-        late_onset_responses_vec
+                                         late_onset_responses)
+    return early_onset_matrix, late_onset_matrix
+        #, early_onset_responses, late_onset_responses
 
 
 def matrix_generator(f, max_length, min_length, response_vec):
@@ -38,7 +41,8 @@ def matrix_generator(f, max_length, min_length, response_vec):
     for line in tqdm(f[2:]):
         line = line.split()
         id, seq = line[0], line[1]
-        # checks if we have the response value for the id before loading it to the dataset
+        #  checks if we have the response value for the id before loading it
+        #  to the dataset
         if id in response_vec.index.tolist():
             k_mers_counter[id] = k_mers_count(seq, min_length, max_length)
     samples = pd.DataFrame.from_dict(k_mers_counter, orient="index", dtype=int)
