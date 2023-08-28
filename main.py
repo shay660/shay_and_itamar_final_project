@@ -10,13 +10,14 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
 
 
-def model_generator(df: pd.DataFrame):
-    X_train, X_test, y_train, y_test = train_test_split(df.iloc[:, :-3],
-                                                        df.iloc[:, -3:],
+def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame):
+    samples = samples.join(response_vec, how="inner")
+    X_train, X_test, y_train, y_test = train_test_split(samples.iloc[:, :-3],
+                                                        samples.iloc[:, -3:],
                                                         test_size=0.1,
                                                         random_state=1)
-    lasso_model = Lasso(max_iter=2500)
-    alphas: Dict[str, List[float]] = {'alpha': [0.01, 0.02, 0.015, 0.008]}
+    lasso_model = Lasso(max_iter=5000)
+    alphas: Dict[str, List[float]] = {'alpha': [0.001, 0.003, 0.005]}
     grid_search = GridSearchCV(lasso_model, alphas, cv=5,
                                scoring='neg_mean_squared_error').fit(X_train,
                                                                      y_train)
@@ -27,7 +28,7 @@ def model_generator(df: pd.DataFrame):
     lasso_model = grid_search.best_estimator_
     # chose only the sequences that effects the desegregation rate according
     # to the lasso model.
-    X_train = X_train.loc[:, (lasso_model.coef_ != 0).any(axis= 0)]
+    X_train = X_train.loc[:, (lasso_model.coef_ != 0).any(axis=0)]
     X_test = X_test.loc[:, X_train.columns]
     linear_reg_model = LinearRegression().fit(X_train, y_train)
     prediction = linear_reg_model.predict(X_test)
@@ -42,9 +43,17 @@ def model_generator(df: pd.DataFrame):
 
 if __name__ == '__main__':
     start = time()
-    early_onset_df, late_onset_df = load_seq_data("./data/1000_samples_data.txt",
-                                        "./data/3U.models.3U.40A.seq1022_param.txt",
-                                     3, 7)
+    # load data without poly(A)
+    early_onset_with_polyA, late_onset_with_polyA, early_responses_with_polyA, \
+        late_responses_with_polyA = load_seq_data("./data/1000_samples_data.txt",
+                                                  "./data/3U.models.3U.00A.seq1022_param.txt",
+                                                  3, 7)
+    # load data with poly(A)
+    # early_onset_without_polyA, late_onset_without_polyA, \
+    #     early_responses_without_polyA, late_responses_without_polyA = \
+    #     load_seq_data("./data/15k_samples_data.txt",
+    #                   "./data/3U.models.3U.40A.seq1022_param.txt", 3, 7)
 
-    model_generator(early_onset_df)
+    # TODO generated fitted models.
 
+    model_generator(early_onset_with_polyA, early_responses_with_polyA)
