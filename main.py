@@ -52,16 +52,15 @@ if __name__ == '__main__':
 
     # load samples
     early_onset_samples_with_polyA, late_onset_with_polyA = load_seq_data(
-        "data/1000_samples_data.txt",
-        early_responses_with_polyA,
+        "data/1000_samples_data.txt", early_responses_with_polyA,
         late_responses_with_polyA, 3, 7)
     early_onset_samples_without_polyA, late_onset_without_polyA = load_seq_data(
-        "data/1000_samples_data.txt",
-        early_responses_without_polyA,
+        "data/1000_samples_data.txt", early_responses_without_polyA,
         late_responses_without_polyA, 3, 7)
 
     print(f"load data time = {time() - start}.3f")
 
+    #  generate models with all the possible combinations.
     model_generator(early_onset_samples_with_polyA, early_responses_with_polyA)
     end = time()
     print(f"time = {end - start}")
