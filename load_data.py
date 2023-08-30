@@ -5,14 +5,13 @@ from pandas import DataFrame
 from tqdm import tqdm
 
 
-def load_seq_data(samples_path: str, early_onset_responses: pd.DataFrame,
-                  late_onset_responses: pd.DataFrame, min_length: int,
-                  max_length: int) -> Tuple[pd.DataFrame, pd.DataFrame]:  # pd.DataFrame, pd.DataFrame
+def load_seq_data(samples_path: str, responses_vec: pd.DataFrame, min_length:
+ int, max_length: int) -> pd.DataFrame:  # pd.DataFrame, pd.DataFrame
     """
     loads the data from a text file into data frame that count how many times
     each sequence in the length of 3-7 nucleotides is in each 3'URR.
     :param samples_path: path to a text file
-    :param early_onset_responses:
+    :param responses_vec:
     :param late_onset_responses:
     :param min_length:
     :param max_length:
@@ -20,22 +19,18 @@ def load_seq_data(samples_path: str, early_onset_responses: pd.DataFrame,
     length of 3-7 nucleotides is in each 3'URR. one for the early onset and
     the other for late onset sequences. The shape (n_genes, 4^3+4^4+4^5+4^6+4^7)
     """
-    f: list = open(samples_path, "r").readlines()
 
     # loads the responses vector
-    # early_onset_responses, late_onset_responses = load_response(
+    # responses_vec, late_onset_responses = load_response(
     #     response_path)
 
-    early_onset_matrix = _matrix_generator(f, max_length, min_length,
-                                           early_onset_responses)
-    late_onset_matrix = _matrix_generator(f, max_length, min_length,
-                                          late_onset_responses)
-    return early_onset_matrix, late_onset_matrix
-        #, early_onset_responses, late_onset_responses
+    df = _matrix_generator(f, max_length, min_length,
+                           responses_vec)
+    return df
 
 
-def _matrix_generator(f: List[str], max_length: int, min_length: int,
-                      response_vec) -> pd.DataFrame:
+def _matrix_generator(f: List[str], response_vec,min_length: int,
+                      max_length:int) -> pd.DataFrame:
     """
     generate a matrix from a list of sequences that count how many times each
     gene of the length min_length to max_length is in each sequence.
@@ -87,7 +82,7 @@ def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
     return counts
 
 
-def load_response(path: str) -> Tuple[DataFrame, DataFrame]:
+def load_response(path: str, ) -> DataFrame:
     """
     load the responses
     :param path:path to the responses
@@ -96,25 +91,17 @@ def load_response(path: str) -> Tuple[DataFrame, DataFrame]:
     lines: List[str] = open(path, "r").readlines()
     # id_to_rate: Dict[str: float] = {}
     # id_to_x0: Dict[str: float] = {}
-    early_onset_dict = {}
-    late_onset_dict = {}
+    all_onset_dict = {}
     for line in lines[1:]:
         line = line.split()
         id, deg_rate, x0, t0 = line[0], line[1], line[2], line[3]
         # id_to_rate[id],id_to_x0[id] = deg_rate, x0
-        if float(t0) == 1:
-            early_onset_dict[id] = [deg_rate, x0, t0]
-        else:
-            late_onset_dict[id] = [deg_rate, x0, t0]
+        all_onset_dict[id] = [deg_rate, x0, t0]
 
     # rate_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_rate, orient="index")
     # x0_df: pd.DataFrame = pd.DataFrame.from_dict(id_to_x0, orient="index")
     # samples: pd.DataFrame = rate_df.join(x0_df, how= "inner")
-    early_onset_df: pd.DataFrame = pd.DataFrame.from_dict(early_onset_dict,
-                                                          orient="index")
-    late_onset_df: pd.DataFrame = pd.DataFrame.from_dict(late_onset_dict,
-                                                         orient="index")
-    early_onset_df.columns, late_onset_df.columns = ['degradation rate', 'x0',
-                                                     't0'], ['degradation rate',
-                                                             'x0', 't0']
-    return early_onset_df, late_onset_df
+    all_onset_df: pd.DataFrame = pd.DataFrame.from_dict(all_onset_dict,
+                                                        orient="index")
+    all_onset_df.columns = ['degradation rate', 'x0', 't0']
+    return all_onset_df
