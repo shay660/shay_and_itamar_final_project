@@ -25,12 +25,18 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
     X_train, X_test, y_train, y_test = train_test_split(samples.iloc[:, :-3],
                                                         samples.iloc[:, -3:], test_size=0.1,
                                                         random_state=1)
+    print("Split the data to train and test")
+    print(f"size of the train set {X_train.shape[0]}")
+    print(f"size of the test set {X_test.shape[0]}")
+
     lasso_model = Lasso(max_iter=5000)
     # set all possible values for the regularization term
     alphas: Dict[str, List[float]] = {'alpha': alphas}
 
     # cross validation model
     grid_search = GridSearchCV(lasso_model, alphas, cv=5, scoring='neg_mean_squared_error').fit(X_train, y_train)
+
+    print("**** FINISH GRID-SEARCH ****")
 
     best_alpha = grid_search.best_params_['alpha']
     print(f"Best Alpha: {best_alpha}")
@@ -40,8 +46,12 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
     X_train = X_train.loc[:, (lasso_model.coef_ != 0).any(axis=0)]
     X_test = X_test.loc[:, X_train.columns]
 
+    print(f"Number of non-zeroes weightS features after the Lasso: "
+          f"{X_train.shape}")
+
     # creates a linear regression model with the features as the non-zero coefficients of the lasso
     linear_reg_model = LinearRegression().fit(X_train, y_train)
+    print(f"**** Linear Regression Fitted ****")
 
     # estimation
     prediction = linear_reg_model.predict(X_test)
@@ -95,7 +105,7 @@ if __name__ == '__main__':
     print("************ \nEarly-onset without PolyA")
     model_generator(early_samples_without_polyA, [0.005, 0.008, 0.01])
     print("************ \nAll data with PolyA")
-    model_generator(samples_with_polyA, [0.005, 0.008,0.01])
+    model_generator(samples_with_polyA, [0.005, 0.008, 0.01])
     print("************ \nAll data without PolyA")
     model_generator(samples_without_polyA, [0.005, 0.008, 0.01])
     end = time()
