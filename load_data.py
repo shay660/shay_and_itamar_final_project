@@ -4,12 +4,12 @@ import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
 
-def _matrix_generator(f: List[str], response_vec,min_length: int,
-                      max_length:int) -> pd.DataFrame:
+def matrix_generator(seq: List[str], response_vec, min_length: int,
+                     max_length: int) -> pd.DataFrame:
     """
     generate a matrix from a list of sequences that count how many times each
     gene of the length min_length to max_length is in each sequence.
-    :param f: list of sequences
+    :param seq: list of sequences
     :param max_length:the min length of k_mer to look for.
     :param min_length:the max length of k_mer to look for.
     :param response_vec:
@@ -18,7 +18,7 @@ def _matrix_generator(f: List[str], response_vec,min_length: int,
     """
     # create dict. key is id, value is a dict where the key is k_mer and the value is its frequency in the id seq.
     k_mers_counter: Dict[str: Dict[str, int]] = {}
-    for line in tqdm(f[2:]):
+    for line in tqdm(seq[2:]):
         line = line.split()
         id, seq = line[0], line[1]
 
@@ -56,18 +56,20 @@ def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
     return counts
 
 
-def load_response(path: str, ) -> DataFrame:
+def load_response(path: str) -> DataFrame:
     """
     load the responses
     :param path:path to the responses
     :return: pandas DataFrame of the responses.
     """
+    # use pandas read csv and delete this.
     lines: List[str] = open(path, "r").readlines()
     responses_dict = {}
     for line in lines[1:]:
         line = line.split()
         id, deg_rate, x0, t0 = line[0], line[1], line[2], line[3]
         responses_dict[id] = [deg_rate, x0, t0]
-    responses_df: pd.DataFrame = pd.DataFrame.from_dict(responses_dict,orient="index")
+    responses_df: pd.DataFrame = pd.DataFrame.from_dict(responses_dict,
+                                                        orient="index")
     responses_df.columns = ['degradation rate', 'x0', 't0']
     return responses_df

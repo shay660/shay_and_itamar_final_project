@@ -4,7 +4,7 @@ from typing import Dict, List
 
 import pandas as pd
 
-from load_data import load_response, _matrix_generator
+from load_data import load_response, matrix_generator
 from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
@@ -23,9 +23,10 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame, alphas: l
     # merge samples with responses iff we have the needed data for both. many samples are filtered because
     # we don't have a proper response for them
     samples = samples.join(response_vec, how="inner")
-    X_train, X_test, y_train, y_test = train_test_split(samples.iloc[:, :-3],samples.iloc[:, -3:], test_size=0.1,
+    X_train, X_test, y_train, y_test = train_test_split(samples.iloc[:, :-3],
+                                                        samples.iloc[:, -3:], test_size=0.1,
                                                         random_state=1)
-
+    # TODO add prints that indicate the run state.
     lasso_model = Lasso(max_iter=5000)
     # set all possible values for the regularization term
     alphas: Dict[str, List[float]] = {'alpha': alphas}
@@ -63,16 +64,19 @@ if __name__ == '__main__':
         sys.argv[3])
 
     # filter samples with t0=1 to be the early on-set vectors
+    # TODO use int compare
     early_responses_without_polyA = responses_without_polyA[
         responses_without_polyA['t0'] == '1']
     early_responses_with_polyA = responses_with_polyA[
         responses_with_polyA['t0'] == '1']
 
     # creates 4 dataframes
-    samples_with_polyA = _matrix_generator(f, responses_with_polyA, 3, 7)
-    samples_without_polyA = _matrix_generator(f,responses_without_polyA, 3, 7)
-    early_samples_with_polyA = _matrix_generator(f,early_responses_with_polyA, 3, 7)
-    early_samples_without_polyA = _matrix_generator(f,early_responses_without_polyA, 3, 7)
+    # TODO save the matrix one time - with all the samples - and than split
+    #  it.
+    samples_with_polyA = matrix_generator(f, responses_with_polyA, 3, 7)
+    samples_without_polyA = matrix_generator(f, responses_without_polyA, 3, 7)
+    early_samples_with_polyA = matrix_generator(f, early_responses_with_polyA, 3, 7)
+    early_samples_without_polyA = matrix_generator(f, early_responses_without_polyA, 3, 7)
 
     print(f"load data time = {time() - start}")
 
