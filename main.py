@@ -26,13 +26,18 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame, alphas: l
     X_train, X_test, y_train, y_test = train_test_split(samples.iloc[:, :-3],
                                                         samples.iloc[:, -3:], test_size=0.1,
                                                         random_state=1)
-    # TODO add prints that indicate the run state.
+    print("Split the data to train and test.")
+    print(f"Train size - {X_train.shape[0]} samples")
+    print(f"Test size - {X_test.shape[0]} samples")
+
     lasso_model = Lasso(max_iter=5000)
     # set all possible values for the regularization term
     alphas: Dict[str, List[float]] = {'alpha': alphas}
 
     # cross validation model
-    grid_search = GridSearchCV(lasso_model, alphas, cv=10, scoring='neg_mean_squared_error').fit(X_train, y_train)
+    grid_search = GridSearchCV(lasso_model, alphas, cv=5,
+                               scoring='neg_mean_squared_error').fit(X_train, y_train)
+    print("**** finish Grid Search ****")
 
     best_alpha = grid_search.best_params_['alpha']
     print(f"Best Alpha: {best_alpha}")
@@ -42,8 +47,11 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame, alphas: l
     X_train = X_train.loc[:, (lasso_model.coef_ != 0).any(axis=0)]
     X_test = X_test.loc[:, X_train.columns]
 
+    print(f"Number of features after the Lasso cut: {X_train.shape[1]}")
+
     # creates a linear regression model with the features as the non-zero coefficients of the lasso
     linear_reg_model = LinearRegression().fit(X_train, y_train)
+    print("**** finish fit the Linear Regression model ****")
 
     # estimation
     prediction = linear_reg_model.predict(X_test)
@@ -78,7 +86,7 @@ if __name__ == '__main__':
     early_samples_with_polyA = matrix_generator(f, early_responses_with_polyA, 3, 7)
     early_samples_without_polyA = matrix_generator(f, early_responses_without_polyA, 3, 7)
 
-    print(f"load data time = {time() - start}")
+    print(f"load data time = {round(time() - start, 3)} sec")
 
     #  generate models with all the possible combinations.
     print("Early-onset with PolyA")
