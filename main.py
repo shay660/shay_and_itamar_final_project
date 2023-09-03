@@ -11,7 +11,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
 
 
-def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame, alphas: list) -> None:
+def model_generator(samples: pd.DataFrame, alphas: list) -> None:
     """
     Generate and evaluate a predictive model using Lasso regression followed by Linear Regression.
     :param samples: Input data
@@ -22,22 +22,15 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame, alphas: l
 
     # merge samples with responses iff we have the needed data for both. many samples are filtered because
     # we don't have a proper response for them
-    samples = samples.join(response_vec, how="inner")
     X_train, X_test, y_train, y_test = train_test_split(samples.iloc[:, :-3],
                                                         samples.iloc[:, -3:], test_size=0.1,
                                                         random_state=1)
-    print("Split the data to train and test.")
-    print(f"Train size - {X_train.shape[0]} samples")
-    print(f"Test size - {X_test.shape[0]} samples")
-
     lasso_model = Lasso(max_iter=5000)
     # set all possible values for the regularization term
     alphas: Dict[str, List[float]] = {'alpha': alphas}
 
     # cross validation model
-    grid_search = GridSearchCV(lasso_model, alphas, cv=5,
-                               scoring='neg_mean_squared_error').fit(X_train, y_train)
-    print("**** finish Grid Search ****")
+    grid_search = GridSearchCV(lasso_model, alphas, cv=5, scoring='neg_mean_squared_error').fit(X_train, y_train)
 
     best_alpha = grid_search.best_params_['alpha']
     print(f"Best Alpha: {best_alpha}")
@@ -47,11 +40,8 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame, alphas: l
     X_train = X_train.loc[:, (lasso_model.coef_ != 0).any(axis=0)]
     X_test = X_test.loc[:, X_train.columns]
 
-    print(f"Number of features after the Lasso cut: {X_train.shape[1]}")
-
     # creates a linear regression model with the features as the non-zero coefficients of the lasso
     linear_reg_model = LinearRegression().fit(X_train, y_train)
-    print("**** finish fit the Linear Regression model ****")
 
     # estimation
     prediction = linear_reg_model.predict(X_test)
@@ -65,41 +55,48 @@ def model_generator(samples: pd.DataFrame, response_vec: pd.DataFrame, alphas: l
 if __name__ == '__main__':
     start = time()
 
-    # reads arguments
-    f: list = open(sys.argv[1], "r").readlines()
-    responses_with_polyA = load_response(sys.argv[2])
-    responses_without_polyA = load_response(
-        sys.argv[3])
+    if len(sys.argv) > 1:
+        # reads arguments
+        print("************ \n Parses text file arguments into dataFrames")
+        f = pd.read_csv(sys.argv[2], delimiter='\t', index_col= 0, skiprows=2, names=['id', 'seq'])
+        responses_with_polyA = pd.read_csv(sys.argv[3], delimiter='\t', index_col= 0, skiprows=1, names=['id', 'degradation rate', 'x0', 't0'])
+        responses_without_polyA = pd.read_csv(sys.argv[4], delimiter='\t', index_col=0, skiprows=1, names=['id', 'degradation rate', 'x0', 't0'])
+        min_length_kmer = int(sys.argv[5])
+        max_length_kmer = int(sys.argv[6])
 
-    # filter samples with t0=1 to be the early on-set vectors
-    # TODO use int compare
-    early_responses_without_polyA = responses_without_polyA[
-        responses_without_polyA['t0'] == '1']
-    early_responses_with_polyA = responses_with_polyA[
-        responses_with_polyA['t0'] == '1']
+        print("************ \nFilters early on-set responses")
+        early_responses_without_polyA = responses_without_polyA[
+            responses_without_polyA['t0'] == 1]
+        early_responses_with_polyA = responses_with_polyA[
+            responses_with_polyA['t0'] == 1]
 
-    # creates 4 dataframes
-    # TODO save the matrix one time - with all the samples - and than split
-    #  it.
-    samples_with_polyA = matrix_generator(f, responses_with_polyA, 3, 7)
-    samples_without_polyA = matrix_generator(f, responses_without_polyA, 3, 7)
-    early_samples_with_polyA = matrix_generator(f, early_responses_with_polyA, 3, 7)
-    early_samples_without_polyA = matrix_generator(f, early_responses_without_polyA, 3, 7)
+        print("************ \nJoins samples to responses")
+        samples_with_polyA = matrix_generator(f, responses_with_polyA, min_length_kmer, max_length_kmer)
+        samples_without_polyA = matrix_generator(f, responses_without_polyA, min_length_kmer, max_length_kmer)
+        early_samples_with_polyA = matrix_generator(f, early_responses_with_polyA, min_length_kmer, max_length_kmer)
+        early_samples_without_polyA = matrix_generator(f, early_responses_without_polyA, min_length_kmer, max_length_kmer)
 
-    print(f"load data time = {round(time() - start, 3)} sec")
+        print("************ \nSaves DataFrames as csv files")
+        samples_with_polyA.to_csv(f'./data/samples_with_polyA.csv', index= True)
+        samples_without_polyA.to_csv(f'./data/samples_without_polyA.csv', index= True)
+        early_samples_with_polyA.to_csv(f'./data/early_samples_with_polyA.csv', index=True)
+        early_samples_without_polyA.to_csv(f'./data/early_samples_without_polyA.csv', index=True)
+    else:
+        print("************ \nOpens saved csv files")
+        samples_with_polyA = pd.read_csv(f'./data/samples_with_polyA.csv', index_col=0)
+        samples_without_polyA = pd.read_csv(f'./data/samples_without_polyA.csv', index_col=0)
+        early_samples_with_polyA = pd.read_csv(f'./data/early_samples_with_polyA.csv', index_col=0)
+        early_samples_without_polyA = pd.read_csv(f'./data/early_samples_without_polyA.csv', index_col=0)
 
+    print(f"************ \nload data time = {time() - start}")
     #  generate models with all the possible combinations.
-    print("Early-onset with PolyA")
-    model_generator(early_samples_with_polyA, early_responses_with_polyA,[0.005, 0.008, 0.01])
-    print("**********************************")
-    print("Early-onset without PolyA")
-    model_generator(early_samples_without_polyA, early_responses_without_polyA,[0.005, 0.008, 0.01])
-    print("**********************************")
-    print("All data with PolyA")
-    model_generator(samples_with_polyA, responses_with_polyA, [0.005, 0.008,0.01])
-    print("**********************************")
-    print("All data without PolyA")
-    model_generator(samples_without_polyA, responses_without_polyA, [0.005,0.008, 0.01])
-    print("**********************************")
+    print("************ \nEarly-onset with PolyA")
+    model_generator(early_samples_with_polyA, [0.005, 0.008, 0.01])
+    print("************ \nEarly-onset without PolyA")
+    model_generator(early_samples_without_polyA, [0.005, 0.008, 0.01])
+    print("************ \nAll data with PolyA")
+    model_generator(samples_with_polyA, [0.005, 0.008,0.01])
+    print("************ \nAll data without PolyA")
+    model_generator(samples_without_polyA, [0.005, 0.008, 0.01])
     end = time()
-    print(f"time = {end - start}")
+    print(f"************ \ntime = {end - start}")
