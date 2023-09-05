@@ -38,7 +38,7 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
     alphas: Dict[str, List[float]] = {'alpha': alphas}
 
     # cross validation model
-    grid_search = GridSearchCV(lasso_model, alphas, cv=3,
+    grid_search = GridSearchCV(lasso_model, alphas, cv=3, n_jobs=2,
                                scoring='neg_mean_squared_error', verbose=3)
     fitted_grid_search = grid_search.fit(X_train, y_train)
 
@@ -53,7 +53,7 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
     X_test = X_test.loc[:, X_train.columns]
 
     print(f"Number of non-zeroes weightS features after the Lasso: "
-          f"{X_train.shape}", flush=True)
+          f"{X_train.shape[1]}", flush=True)
 
     # creates a linear regression model with the features as the non-zero coefficients of the lasso
     linear_reg_model = LinearRegression().fit(X_train, y_train)
@@ -120,10 +120,12 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
     DataFrame.
     """
     if to_generate_matrix:
+        print("************ \n Parses text file arguments into dataFrames",
+              flush=True)
         samples, responses = load_files(model, path_to_samples,
                                         path_to_response)
-        min_length_kmer = int(sys.argv[6])
-        max_length_kmer = int(sys.argv[7])
+        min_length_kmer = int(sys.argv[7])
+        max_length_kmer = int(sys.argv[8])
         print("************ \nJoins samples to responses", flush=True)
         samples_with_responses = matrix_generator(samples, responses,
                                                   min_length_kmer,
@@ -133,13 +135,11 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
         return samples_with_responses
 
     print("************ \nOpens saved csv files", flush=True)
-    return pd.read_csv(f"./data/{name_of_file}", index_col=0)
+    return pd.read_csv(f"./data/{name_of_file}.csv", index_col=0)
 
 
 if __name__ == '__main__':
     start = time()
-    print("************ \n Parses text file arguments into dataFrames",
-          flush=True)
     to_generate_model: bool = len(sys.argv) > 4
     model_to_run = int(sys.argv[1])
     alphas = [float(x) for x in sys.argv[2].split(",")]
