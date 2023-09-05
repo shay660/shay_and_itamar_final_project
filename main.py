@@ -71,32 +71,33 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
 def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
                                         Tuple[pd.DataFrame, pd.DataFrame]:
     """
-
-    :param model_to_run:
-    :param path_to_samples:
-    :param path_to_response:
-    :return:
+    load the response vector and the file according to the model_to_run
+    :param model_to_run: int that indicates which samples is needed
+    :param path_to_samples: path to the samples file.
+    :param path_to_response: path to the responses file.
+    :return: tuple of samples and the corresponding responses as pandas
+    DataFrame.
     """
     f = pd.read_csv(path_to_samples, delimiter='\t', index_col=0, skiprows=2,
                     names=['id', 'seq'])
-    if model_to_run == 1 or model_to_run == 3:
+    if model_to_run == 1 or model_to_run == 3:  # with polA tail.
         responses_with_polyA = pd.read_csv(path_to_response, delimiter='\t',
                                            index_col=0, skiprows=1,
                                            names=['id', 'degradation rate',
                                                   'x0', 't0'])
-        if model_to_run == 3:
+        if model_to_run == 3:  # early-onset (with polyA tail).
             print("************ \nFilters early on-set responses", flush=True)
             early_responses_with_polyA = responses_with_polyA[
                 responses_with_polyA['t0'] == 1]
             return f, early_responses_with_polyA
         return f, responses_with_polyA
 
-    else:
+    else:  # without polyA tail.
         responses_without_polyA = pd.read_csv(path_to_response, delimiter='\t',
                                               index_col=0, skiprows=1,
                                               names=['id', 'degradation rate',
                                                      'x0', 't0'])
-        if model_to_run == 4:
+        if model_to_run == 4:  # early onset data (without polyA tail).
             print("************ \nFilters early on-set responses", flush=True)
             early_responses_without_polyA = responses_without_polyA[
                 responses_without_polyA['t0'] == 1]
@@ -108,13 +109,15 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
                           path_to_samples: str, path_to_response: str,
                           name_of_file: str) -> pd.DataFrame:
     """
-
+    generate save or upload the samples' matrix, join  with the responses,
+    according to the to_generate_matrix argument.
     :param to_generate_matrix:
-    :param model:
-    :param path_to_samples:
-    :param path_to_response:
-    :param name_of_file:
-    :return:
+    :param model: int that indicates which samples is needed
+    :param path_to_samples: path to the samples file.
+    :param path_to_response: path to the responses file.
+    :param name_of_file: The name of new file or the name of the file, to open.
+    :return: A upload the samples' matrix, join  with the responses pandas
+    DataFrame.
     """
     if to_generate_matrix:
         samples, responses = load_files(model, path_to_samples,
@@ -139,7 +142,7 @@ if __name__ == '__main__':
           flush=True)
     to_generate_model: bool = len(sys.argv) > 4
     model_to_run = int(sys.argv[1])
-    alphas = [float(x) for x in sys.argv[2][1:-1].split(",")]
+    alphas = [float(x) for x in sys.argv[2].split(",")]
     path_to_samples = sys.argv[4] if to_generate_model else None
     path_to_responses = sys.argv[5] if to_generate_model else None
     name_of_file = sys.argv[3]
@@ -151,6 +154,10 @@ if __name__ == '__main__':
                                                          name_of_file=name_of_file)
     print("************  \nRum The model", flush=True)
     model_generator(samples_to_run, alphas)
+
+    end = time()
+    print(f"************ \ntime = {end - start}", flush=True)
+
     # if len(sys.argv) > 2:
     #     # reads arguments
     #     f = pd.read_csv(sys.argv[3], delimiter='\t', index_col=0, skiprows=2,
@@ -224,5 +231,3 @@ if __name__ == '__main__':
     #     print("************ \nEarly-onset without PolyA", flush=True)
     #     model_generator(early_samples_without_polyA, [0.005, 0.008, 0.01])
 
-    end = time()
-    print(f"************ \ntime = {end - start}", flush=True)
