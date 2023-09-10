@@ -12,6 +12,8 @@ from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 
 
 def model_generator(samples: pd.DataFrame, alphas: list) -> None:
@@ -54,6 +56,23 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
 
     print(f"Number of non-zeroes weightS features after the Lasso: "
           f"{X_train.shape[1]}", flush=True)
+
+    #tries polynimial regression
+    # poly_reg = PolynomialFeatures(degree=2)
+    # poly_X_train= poly_reg.fit_transform(X_train)
+    # poly_X_test = poly_reg.fit_transform(X_test)
+    #
+    # poly_reg_model = make_pipeline(PolynomialFeatures(degree=2), LinearRegression())
+    # poly_reg_model.fit(poly_X_train, y_train)
+    # print(f"**** Linear Regression Fitted ****", flush=True)
+    #
+    # # estimation
+    # poly_prediction = poly_reg_model.predict(poly_X_test)
+    # mse = mean_squared_error(y_test, poly_prediction)
+    # r2 = r2_score(y_test, poly_prediction)
+    #
+    # print(f"MSE of the Linear regression = {mse}", flush=True)
+    # print(f"r2 of the Linear regression = {r2}", flush=True)
 
     # creates a linear regression model with the features as the non-zero coefficients of the lasso
     linear_reg_model = LinearRegression().fit(X_train, y_train)
