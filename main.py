@@ -13,6 +13,7 @@ from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
+from joblib import dump, load
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 
@@ -20,6 +21,7 @@ from sklearn.pipeline import make_pipeline
 def model_generator(samples: pd.DataFrame, alphas: list) -> None:
     """
     Generate and evaluate a predictive model using Lasso regression followed by Linear Regression.
+    :param model_name: the name of the saved model
     :param samples: Input data
     :param response_vec: responses data
     :param alphas: List of alpha values for Lasso regularization
@@ -70,9 +72,11 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
     print(f"MSE of the Linear regression = {mse}", flush=True)
     print(f"r2 of the Linear regression = {r2}", flush=True)
 
+    return linear_reg_model
+
 
 def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
-                                        Tuple[pd.DataFrame, pd.DataFrame]:
+        Tuple[pd.DataFrame, pd.DataFrame]:
     """
     load the response vector and the file according to the model_to_run
     :param model_to_run: int that indicates which samples is needed
@@ -110,7 +114,7 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
 
 def save_or_upload_matrix(to_generate_matrix: bool, model: int,
                           path_to_samples: str, path_to_response: str,
-                          name_of_file: str) -> pd.DataFrame:
+                          name_of_file: str, min_length_kmer: int, max_length_kmer: int) -> pd.DataFrame:
     """
     generate save or upload the samples' matrix, join  with the responses,
     according to the to_generate_matrix argument.
@@ -127,36 +131,52 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
               flush=True)
         samples, responses = load_files(model, path_to_samples,
                                         path_to_response)
-        min_length_kmer = int(sys.argv[7])
-        max_length_kmer = int(sys.argv[8])
         print("************ \nJoins samples to responses", flush=True)
         samples_with_responses = matrix_generator(samples, responses,
                                                   min_length_kmer,
                                                   max_length_kmer)
         print("************ \nSaves DataFrames as csv files", flush=True)
-        samples_with_responses.to_csv(f"./data/matrices/{name_of_file}", index=True)
+        samples_with_responses.to_csv(f"./data/matrices/{name_of_file}.csv", index=True)
         return samples_with_responses
 
     print("************ \nOpens saved csv files", flush=True)
     return pd.read_csv(f"./data/matrices/{name_of_file}.csv", index_col=0)
 
 
+def argument_parser(args: list[str], generate_model: bool):
+    """
+    parse given command line arguments
+    :param args: command line arguments
+    :param generate_model: boolean flag
+    :return: parsed arguments
+    """
+    _model_to_run = int(args[1])
+    _alphas = [float(x) for x in args[2].split(",")]
+    _name_of_file = args[3]
+    _name_of_model = args[4]
+    _path_to_samples = args[5] if generate_model else None
+    _path_to_responses = args[6] if generate_model else None
+    _min_length_kmer = int(sys.argv[7]) if generate_model else None
+    _max_length_kmer = int(sys.argv[8]) if generate_model else None
+
+    return _model_to_run, _alphas, _name_of_file, _name_of_model, _path_to_samples, _path_to_responses, \
+            _min_length_kmer, _max_length_kmer
+
+
 if __name__ == '__main__':
     start = time()
-    to_generate_model: bool = len(sys.argv) > 4
-    model_to_run = int(sys.argv[1])
-    alphas = [float(x) for x in sys.argv[2].split(",")]
-    path_to_samples = sys.argv[4] if to_generate_model else None
-    path_to_responses = sys.argv[5] if to_generate_model else None
-    name_of_file = sys.argv[3]
-
+    to_generate_model: bool = len(sys.argv) > 5
+    model_to_run, alphas, name_of_file, name_of_model, path_to_samples, path_to_responses, min_length_kmer,\
+        max_length_kmer = argument_parser(sys.argv, to_generate_model)
     samples_to_run: pd.DataFrame = save_or_upload_matrix(to_generate_model,
                                                          model_to_run,
                                                          path_to_response=path_to_responses,
                                                          path_to_samples=path_to_samples,
-                                                         name_of_file=name_of_file)
+                                                         name_of_file=name_of_file, min_length_kmer= min_length_kmer,
+                                                         max_length_kmer= max_length_kmer)
     print("************  \nRum The model", flush=True)
-    model_generator(samples_to_run, alphas)
+    model =model_generator(samples_to_run, alphas)
+    dump(model, f"./models/{name_of_model}.joblib")
 
     end = time()
     print(f"************ \ntime = {end - start}", flush=True)
