@@ -4,6 +4,7 @@ from pyexpat import model
 from time import time
 from typing import Dict, List, Tuple
 
+import numpy as np
 import pandas as pd
 import enum
 
@@ -56,23 +57,6 @@ def model_generator(samples: pd.DataFrame, alphas: list) -> None:
 
     print(f"Number of non-zeroes weightS features after the Lasso: "
           f"{X_train.shape[1]}", flush=True)
-
-    #tries polynimial regression
-    # poly_reg = PolynomialFeatures(degree=2)
-    # poly_X_train= poly_reg.fit_transform(X_train)
-    # poly_X_test = poly_reg.fit_transform(X_test)
-    #
-    # poly_reg_model = make_pipeline(PolynomialFeatures(degree=2), LinearRegression())
-    # poly_reg_model.fit(poly_X_train, y_train)
-    # print(f"**** Linear Regression Fitted ****", flush=True)
-    #
-    # # estimation
-    # poly_prediction = poly_reg_model.predict(poly_X_test)
-    # mse = mean_squared_error(y_test, poly_prediction)
-    # r2 = r2_score(y_test, poly_prediction)
-    #
-    # print(f"MSE of the Linear regression = {mse}", flush=True)
-    # print(f"r2 of the Linear regression = {r2}", flush=True)
 
     # creates a linear regression model with the features as the non-zero coefficients of the lasso
     linear_reg_model = LinearRegression().fit(X_train, y_train)
@@ -154,7 +138,7 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
         return samples_with_responses
 
     print("************ \nOpens saved csv files", flush=True)
-    return pd.read_csv(f"./data/{name_of_file}.csv", index_col=0)
+    return pd.read_csv(f"./data/matrices/{name_of_file}.csv", index_col=0)
 
 
 if __name__ == '__main__':
