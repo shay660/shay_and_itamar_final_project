@@ -6,22 +6,22 @@ To use this script, follow these steps:
 
 1. If you want to generate a new matrix for the model the command line should
 be:
-    python3 main.py model_number* alphas_list** name_of_the_matrix
-    path_to_samples_seq_file
-    path_to_degradation_rate_with_polyA_file
-    path_to_degradation_rate_without_polyA_file min_size_of_kmer max_size_of_kmer
+    python3 main.py model_number* alphas_list** name_of_the_matrix model_name
+    path_to_samples_file path_to_responses_file min_size_of_kmer
+    max_size_of_kmer
+
 
     For Example:
-    python3 main.py 0.001,0.002,0.003 samples_with_ployA
-    data/Table_S1_reporters.txt data/3U.models.3U.40A
-    .seq1022_param.txt data/3U.models.3U.00A.seq1022_param.txt 3 7
+    python3 main.py 1 0.001,0.002,0.003 samples_with_polyA_matrix
+    late_onset_with_polyA_model data/Table_S1_reporters.txt data/3U.models.3U.40A
+    .seq1022_param.txt 3 7
 
 2. If you want to run the script with an existing matrix:
-    python3 main.py model_number* alphas_list** name_of_matrix
+    python3 main.py model_number* alphas_list** name_of_matrix model_name
 
     For Example:
-    python3 main.py 1 0.001,0.002,0.003 samples_with_ployA
-
+    python3 main.py 1 0.001,0.002,0.003 samples_with_ployA_matrix
+    late_onset_with_polyA_model
 
 * model_number is an int from 1-4 such that:
 1 - late-onset with polyA tail model.
