@@ -1,0 +1,33 @@
+The script design to predict degradation rate of mRNA in the cell according to
+it's sequence using linear regression model.
+
+
+To use this script, follow these steps:
+
+1. If you want to generate a new matrix for the model the command line should
+be:
+    python3 main.py model_number* alphas_list** name_of_the_matrix
+    path_to_samples_seq_file
+    path_to_degradation_rate_with_polyA_file
+    path_to_degradation_rate_without_polyA_file min_size_of_kmer max_size_of_kmer
+
+    For Example:
+    python3 main.py 0.001,0.002,0.003 samples_with_ployA
+    data/Table_S1_reporters.txt data/3U.models.3U.40A
+    .seq1022_param.txt data/3U.models.3U.00A.seq1022_param.txt 3 7
+
+2. If you want to run the script with an existing matrix:
+    python3 main.py model_number* alphas_list** name_of_matrix
+
+    For Example:
+    python3 main.py 1 0.001,0.002,0.003 samples_with_ployA
+
+
+* model_number is an int from 1-4 such that:
+1 - late-onset with polyA tail model.
+2 - late-onset without polyA tail model.
+3 - early-onset with polyA tail model.
+4 - early-onset without polyA tail model.
+
+** alphas_list: List of float with no spaces and a comma between them.
+
