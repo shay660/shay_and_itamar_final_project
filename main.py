@@ -2,16 +2,14 @@ import sys
 from time import time
 from typing import Tuple, List
 
+import numpy as np
 import pandas as pd
 
 from load_data import matrix_generator
 from model_generator import linear_reg_model_generator, \
     lasso_and_cross_validation_generator
+from sklearn.metrics import mean_squared_error, r2_score
 from joblib import dump, load
-
-
-
-
 
 
 def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
@@ -98,8 +96,16 @@ def argument_parser(args: List[str], generate_model: bool):
     _min_length_kmer = int(sys.argv[7]) if generate_model else None
     _max_length_kmer = int(sys.argv[8]) if generate_model else None
 
-    return _model_to_run, _alphas, _name_of_file, _name_of_model, _path_to_samples, _path_to_responses, \
-            _min_length_kmer, _max_length_kmer
+    return _model_to_run, _alphas, _name_of_file, _name_of_model,\
+        _path_to_samples, _path_to_responses, _min_length_kmer, _max_length_kmer
+
+
+def predict_and_calculate_loss(_model, X_test, y_test):
+    prediction = _model.predict(X_test)
+    mse = mean_squared_error(y_test, prediction)
+    r = np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0, 1]
+    print(f"MSE of the Linear regression = {mse}", flush=True)
+    print(f"r of the Linear regression = {r}", flush=True)
 
 
 if __name__ == '__main__':
@@ -113,8 +119,9 @@ if __name__ == '__main__':
                                                          path_to_samples=path_to_samples,
                                                          name_of_file=name_of_file, min_length_kmer= min_length_kmer,
                                                          max_length_kmer= max_length_kmer)
-    print("************  \nRum The model", flush=True)
-    model = lasso_and_cross_validation_generator(samples_to_run, alphas)
+    print("************  \nRun The model", flush=True)
+    model, X_train, y_train = linear_reg_model_generator(samples_to_run)
+    predict_and_calculate_loss(model, X_train, y_train)
     dump(model, f"./models/{name_of_model}.joblib")
 
     end = time()
