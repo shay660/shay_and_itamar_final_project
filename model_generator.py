@@ -48,8 +48,8 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list) \
     alphas: Dict[str, List[float]] = {'alpha': alphas}
 
     # cross validation model
-    grid_search = GridSearchCV(lasso_model, alphas, cv=8, n_jobs=5,
-                               scoring='neg_mean_squared_error', verbose=8)
+    grid_search = GridSearchCV(lasso_model, alphas, cv=6, n_jobs=5,
+                               scoring='neg_mean_squared_error', verbose=3)
     fitted_grid_search = grid_search.fit(X_train, y_train)
 
     print("**** FINISH GRID-SEARCH ****", flush=True)
