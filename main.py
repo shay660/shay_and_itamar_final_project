@@ -120,7 +120,8 @@ if __name__ == '__main__':
                                                          name_of_file=name_of_file, min_length_kmer= min_length_kmer,
                                                          max_length_kmer= max_length_kmer)
     print("************  \nRun The model", flush=True)
-    model, X_train, y_train = lasso_and_cross_validation_generator(samples_to_run)
+    model, X_train, y_train = lasso_and_cross_validation_generator(
+        samples_to_run, alphas)
     predict_and_calculate_loss(model, X_train, y_train)
     dump(model, f"./models/{name_of_model}.joblib")
 
