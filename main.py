@@ -4,6 +4,9 @@ from typing import Tuple, List
 
 import numpy as np
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import seaborn as sns
 
 from load_data import matrix_generator
 from model_generator import linear_reg_model_generator, \
@@ -104,8 +107,30 @@ def predict_and_calculate_loss(_model, X_test, y_test):
     prediction = _model.predict(X_test)
     mse = mean_squared_error(y_test, prediction)
     r = np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0, 1]
+
     print(f"MSE of the Linear regression = {mse}", flush=True)
     print(f"r of the Linear regression = {r}", flush=True)
+
+    make_scatter_plot(X_test, _model, r, y_test)
+
+
+def make_scatter_plot(X_test, _model, r, y_test):
+    prediction = pd.DataFrame(_model.predict(X_test), index=y_test.index, columns=y_test.columns)
+    prediction_vs_true_df = pd.DataFrame({'True degradation rate': y_test['degradation rate'],
+                                          'Predicted degradation rate': prediction['degradation rate']})
+    fig = px.scatter(prediction_vs_true_df, x='True degradation rate', y='Predicted degradation rate',
+                     title='Degradation rate: Predicted vs true', color_discrete_sequence=['red'])
+    fig.update_layout(xaxis=dict(showticklabels=False, showline=False),
+                      yaxis=dict(showticklabels=False, showline=False))
+    fig.add_annotation(text=f"r={r}", x=0.1, y=0.1,
+                       showarrow=False, font=dict(size=26, color='black'))
+    fig.add_trace(go.Scatter(x=[min(prediction_vs_true_df['True degradation rate']),
+                                max(prediction_vs_true_df['True degradation rate'])],
+                             y=[min(prediction_vs_true_df['True degradation rate']),
+                                max(prediction_vs_true_df['True degradation rate'])],
+                             mode='lines',
+                             line=dict(color='grey', dash='dash')))
+    fig.show()
 
 
 if __name__ == '__main__':

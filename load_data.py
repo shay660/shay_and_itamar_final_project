@@ -54,20 +54,3 @@ def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
     return counts
 
 
-# def load_response(path_to_samples: str) -> DataFrame:
-#     """
-#     load the responses
-#     :param path_to_samples:path_to_samples to the responses
-#     :return: pandas DataFrame of the responses.
-#     """
-#     # use pandas read csv and delete this.
-#     lines: List[str] = open(path_to_samples, "r").readlines()
-#     responses_dict = {}
-#     for line in lines[1:]:
-#         line = line.split()
-#         id, deg_rate, x0, t0 = line[0], line[1], line[2], line[3]
-#         responses_dict[id] = [deg_rate, x0, t0]
-#     responses_df: pd.DataFrame = pd.DataFrame.from_dict(responses_dict,
-#                                                         orient="index")
-#     responses_df.columns = ['degradation rate', 'x0', 't0']
-#     return responses_df
