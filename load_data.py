@@ -1,8 +1,5 @@
 from typing import Dict, List, Tuple
-import numpy as np
 import pandas as pd
-from pandas import DataFrame
-from tqdm import tqdm
 
 def matrix_generator(f : pd.DataFrame, response_vec, min_length: int,
                      max_length: int) -> pd.DataFrame:
@@ -19,7 +16,7 @@ def matrix_generator(f : pd.DataFrame, response_vec, min_length: int,
 
     # create dict. key is id, value is a dict where the key is k_mer and the value is its frequency in the id seq.
     k_mers_counter: Dict[str: Dict[str, int]] = {}
-    for sample in tqdm(f.index):
+    for sample in f.index:
         #  checks if we have the response value for the id before loading it to the dataset
         if sample in response_vec.index.tolist():
             k_mers_counter[sample] = k_mers_count(f.loc[sample, 'seq'], min_length, max_length)
