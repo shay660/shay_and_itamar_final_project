@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import seaborn as sns
 
 from load_data import matrix_generator
 from model_generator import linear_reg_model_generator, \
@@ -120,7 +119,7 @@ def make_scatter_plot(X_test, _model, r, y_test):
                                           'Predicted degradation rate': prediction['degradation rate']})
     fig = px.scatter(prediction_vs_true_df, x='True degradation rate', y='Predicted degradation rate',
                      title='Degradation rate: Predicted vs true', color_discrete_sequence=['red'])
-    fig.update_layout(xaxis=dict(showticklabels=False, showline=False),
+    fig.update_layout(xaxis_title= "True degradation rate",
                       yaxis=dict(showticklabels=False, showline=False))
     fig.add_annotation(text=f"r={r}", x=0.1, y=0.1,
                        showarrow=False, font=dict(size=26, color='black'))
