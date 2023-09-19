@@ -130,7 +130,7 @@ def make_scatter_plot(X_test, _model, r, y_test):
                                 max(prediction_vs_true_df['True degradation rate'])],
                              mode='lines',
                              line=dict(color='grey', dash='dash')))
-    fig.show()
+    fig.write_image(f"./models/plots/{name_of_model}_plot.png")
 
 
 if __name__ == '__main__':
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     model, X_train, y_train = lasso_and_cross_validation_generator(
         samples_to_run, alphas)
     predict_and_calculate_loss(model, X_train, y_train)
-    dump(model, f"./models/{name_of_model}.joblib")
+    dump(model, f"./models/{name_of_model}_model.joblib")
 
     end = time()
     print(f"************ \ntime = {end - start}", flush=True)
