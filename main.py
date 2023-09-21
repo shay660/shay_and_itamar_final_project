@@ -150,7 +150,7 @@ def make_heatmap_plot(X, y, r, _name_of_model):
              verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
     plt.xlabel("Ture Degradation Rate")
     plt.ylabel("Predicted Degradation Rate")
-    plt.title(f"{name_of_model.replace('_', ' ')}")
+    plt.title(f"{_name_of_model.replace('_', ' ')}")
 
     # Display or save the plot
     print("******* Save the plot *******")
