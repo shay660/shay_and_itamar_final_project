@@ -31,3 +31,12 @@ be:
 
 ** alphas_list: List of float with no spaces and a comma between them.
 
+To run a prediction with an existing model file name to run should be "run_model.py", and 3 arguments are needed:
+    1st arg - Model's saved joblib file
+    2nd arg - Data file path of an existing kmers counting matrix with its corresponding response vectors
+    3rd arg - Output files name
+
+    For Example:
+    python3 run_model.py .\models\1000_samp_early_onset_model_no_polyA.joblib
+     .\data\matrices\1000_Samp_matrix_early_onset_no_polyA.csv 1000_samples_early_onset_no_polyA
+
