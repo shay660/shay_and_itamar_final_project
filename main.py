@@ -143,10 +143,14 @@ def make_heatmap_plot(X, y, r, _name_of_model):
 
     # Create a scatter plot with colors based on density
     plt.scatter(X, y, c=colors, cmap='viridis', alpha=0.5, edgecolor='none')
+    plt.plot([-5, 1], [-5, 1], color='grey', linestyle='--', label='y=x')
 
     # Add the r value as text to the plot
     plt.text(0.05, 0.95, f'r = {r:.2f}', transform=plt.gca().transAxes, fontsize=12,
              verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+    plt.xlabel("Ture Degradation Rate")
+    plt.ylabel("Predicted Degradation Rate")
+    plt.title(f"{name_of_model.replace('_', ' ')}")
 
     # Display or save the plot
     print("******* Save the plot *******")
