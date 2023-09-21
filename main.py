@@ -76,11 +76,11 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
                                                   min_length_kmer,
                                                   max_length_kmer)
         print("************ \nSaves DataFrames as csv files", flush=True)
-        samples_with_responses.to_csv(f"./data/matrices/{name_of_file}.csv", index=True)
+        samples_with_responses.to_csv(f"./data/matrices/{name_of_file}", index=True)
         return samples_with_responses
 
     print("************ \nOpens saved csv files", flush=True)
-    return pd.read_csv(f"./data/matrices/{name_of_file}.csv", index_col=0)
+    return pd.read_csv(f"./data/matrices/{name_of_file}", index_col=0)
 
 
 def argument_parser(args: List[str], generate_model: bool):
