@@ -9,6 +9,7 @@ be:
     python3 main.py model_number* alphas_list** name_of_the_matrix model_name
     path_to_samples_file path_to_responses_file min_size_of_kmer
     max_size_of_kmer
+    
 
     For Example:
     python3 main.py 1 0.001,0.002,0.003 samples_with_polyA_matrix

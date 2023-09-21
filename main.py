@@ -121,7 +121,7 @@ def make_scatter_plot(X_test, _model, r, y_test):
                      title='Degradation rate: Predicted vs true', color_discrete_sequence=['red'])
     fig.update_layout(xaxis_title= "True degradation rate",
                       yaxis=dict(showticklabels=False, showline=False))
-    fig.add_annotation(text=f"r={r}", x=0.1, y=0.1,
+    fig.add_annotation(text=f"r={round(r,3)}", x=0.1, y=0.1,
                        showarrow=False, font=dict(size=26, color='black'))
     fig.add_trace(go.Scatter(x=[min(prediction_vs_true_df['True degradation rate']),
                                 max(prediction_vs_true_df['True degradation rate'])],
@@ -129,6 +129,7 @@ def make_scatter_plot(X_test, _model, r, y_test):
                                 max(prediction_vs_true_df['True degradation rate'])],
                              mode='lines',
                              line=dict(color='grey', dash='dash')))
+    fig.update_traces(showlegend=False)
     fig.write_image(f"./models/plots/{name_of_model}_plot.png")
 
 
