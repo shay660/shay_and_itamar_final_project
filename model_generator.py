@@ -47,15 +47,15 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
     :param alphas: List of alpha values for Lasso regularization
     :return: None
     """
-    # X_train, y_train, X_test, y_test = _split_to_train_and_test(samples, file)
-    X_train, y_train = samples.iloc[:, :-3], samples.iloc[:, -3:]
+    X_train, y_train, X_test, y_test = _split_to_train_and_test(samples, file)
+    # X_train, y_train = samples.iloc[:, :-3], samples.iloc[:, -3:]
     file.write(f"Number of samples in the train set: {X_train.shape[0]}\n")
     lasso_model = Lasso(max_iter=2500, tol=3e-3)
     # set all possible values for the regularization term
     alphas: Dict[str, List[float]] = {'alpha': alphas}
 
     # cross validation model
-    folds, n_jobs = 10, 4
+    folds, n_jobs = 5, 4
     file.write(f"Number of folds: {folds} (n_jobs = {n_jobs})\n")
     grid_search = GridSearchCV(lasso_model, alphas, cv=folds, n_jobs=4,
                                scoring='neg_mean_squared_error', verbose=3)
@@ -69,7 +69,7 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
     # the lasso model.
     lasso_model = fitted_grid_search.best_estimator_
     X_train = X_train.loc[:, (lasso_model.coef_ != 0).any(axis=0)]
-    # X_test = X_test.loc[:, X_train.columns]
+    X_test = X_test.loc[:, X_train.columns]
     n_features: int = X_train.shape[1]
     print(f"Number of non-zeroes weights features after the Lasso: "
           f"{n_features}", flush=True)
@@ -79,4 +79,4 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
     linear_reg_model = LinearRegression().fit(X_train, y_train)
     print(f"**** Linear Regression Fitted ****", flush=True)
 
-    return linear_reg_model,  X_train, y_train  # X_test, y_test
+    return linear_reg_model, X_test, y_test   #  X_train, y_train
