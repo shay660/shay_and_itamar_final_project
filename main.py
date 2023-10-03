@@ -31,7 +31,7 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
         responses_with_polyA = pd.read_csv(path_to_response, delimiter='\t',
                                            index_col=0, skiprows=1,
                                            names=['id', 'degradation rate',
-                                                  'x0', 't0'])
+                                                  'step_loc', 't0'])
         if model_to_run == 3:  # early-onset (with polyA tail).
             print("************ \nFilters early on-set responses", flush=True)
             early_responses_with_polyA = responses_with_polyA[
@@ -43,7 +43,7 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
         responses_without_polyA = pd.read_csv(path_to_response, delimiter='\t',
                                               index_col=0, skiprows=1,
                                               names=['id', 'degradation rate',
-                                                     'x0', 't0'])
+                                                     'step_loc', 't0'])
         if model_to_run == 4:  # early onset data (without polyA tail).
             print("************ \nFilters early on-set responses", flush=True)
             early_responses_without_polyA = responses_without_polyA[
