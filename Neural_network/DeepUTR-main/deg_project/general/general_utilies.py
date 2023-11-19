@@ -36,8 +36,8 @@ split_to_train_validation_test_disjoint_sets_ids_PATH = files_dir+'dataset/split
 
 #######################evalute pearson and MSE all 8 points models###############################################
 #TODO: support linear model + reduce code 
-from deg_project.lasso_RF import RF_and_lasso_train_test_models_utilies
-from deg_project.NN import NN_train_test_models_utilies
+from ..lasso_RF import RF_and_lasso_train_test_models_utilies
+from ..NN import NN_train_test_models_utilies
 def evalute_pearson_and_RMSE_all_8_points_models(saved_models_path_list, model_type_list,
                                                  model_id_list, data_type_list, saved_models_path_list_RF_lasso,
                                                  validation_seq_or_test, index_for_split=None):
@@ -92,12 +92,14 @@ def evalute_pearson_and_RMSE_all_8_points_models(saved_models_path_list, model_t
 
 
 ###############################lock using lock file######################################
-import fcntl
+# import fcntl  # for Linux
+import portalocker  # for windows
 
 def acquireLock():
     ''' acquire exclusive lock file access '''
     locked_file_descriptor = open('lockfile.LOCK', 'w+')
-    fcntl.lockf(locked_file_descriptor, fcntl.LOCK_EX)
+    # fcntl.lockf(locked_file_descriptor, fcntl.LOCK_EX)
+    portalocker.lock(locked_file_descriptor, portalocker.LOCK_EX)  # for windows
     return locked_file_descriptor
 
 def releaseLock(locked_file_descriptor):
