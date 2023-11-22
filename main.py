@@ -150,7 +150,7 @@ def make_heatmap_plot(X, y, r, _name_of_model):
              verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
     plt.xlabel("Ture Degradation Rate")
     plt.ylabel("Predicted Degradation Rate")
-    plt.title(f"{_name_of_model.replace('_', ' ')}")
+    plt.title(f"{_name_of_model.replace('name', ' ')}")
 
     # Display or save the plot
     print("******* Save the plot *******")
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     model_to_run, alphas, name_of_file, name_of_model, path_to_samples, path_to_responses, min_length_kmer,\
         max_length_kmer = argument_parser(sys.argv, to_generate_model)
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    directory_name = f"./models/{name_of_model}_{timestamp}"
+    directory_name = f"./models/{name_of_model}name{timestamp}"
     mkdir(directory_name)
 
     samples_to_run: pd.DataFrame = save_or_upload_matrix(to_generate_model,
