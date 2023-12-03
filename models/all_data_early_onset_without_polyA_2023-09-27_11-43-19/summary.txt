@@ -1,0 +1,11 @@
+Model all_data_early_onset_without_polyA
+Run at 2023-09-27_11-43-19
+Given alphas: [0.005, 0.003, 0.002]
+Number of samples in the train set: 25883
+Number of samples in the test set: 2876
+Number of samples in the train set: 25883
+Number of folds: 5 (n_jobs = 4)
+Best Alpha: 0.002
+Number of features used by the Lasso: 589
+MSE of the Linear regression = 0.357
+r of the Linear regression = 0.692
