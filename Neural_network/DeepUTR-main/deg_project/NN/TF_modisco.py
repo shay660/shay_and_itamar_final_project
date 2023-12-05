@@ -230,6 +230,6 @@ def generate_modisco_dataset(model_path, seq_path, labels_path_minus, labels_pat
     #save the resutls in neeeded
     if (save_path is not None):
         Path(save_path).mkdir(parents=True, exist_ok=True)
-        general_utilies.pickle.dump([hyp_impscores, impscores, onehot_data, null_distribution], open(save_path+'modisco_input_'+model_id+'_'+data_type+'_'+str('all_outputs' if target_range is None else target_range)+'_'+test_validation_train_or_all_set+'_set.sav', 'wb'))
+        general_utilies.pickle.dump([hyp_impscores, impscores, onehot_data, null_distribution], open(save_path+'modisco_input_'+model_id+'name'+data_type+'name'+str('all_outputs' if target_range is None else target_range)+'name'+test_validation_train_or_all_set+'_set.sav', 'wb'))
     
     return [hyp_impscores, impscores, onehot_data, null_distribution]
