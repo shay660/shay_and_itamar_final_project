@@ -57,8 +57,8 @@ def evalute_pearson_and_RMSE_all_8_points_models(saved_models_path_list, model_t
             RMSE_values_dict[model_id_list[i]+'_multi_A_minus'] = NN_metrics_results[validation_seq_or_test][0]['RMSE']
             RMSE_values_dict[model_id_list[i]+'_multi_A_plus'] = NN_metrics_results[validation_seq_or_test][1]['RMSE']
         else:
-            pearson_values_dict[model_id_list[i]+'_'+data_type_list[i]] = NN_metrics_results[validation_seq_or_test][0]['pearson']
-            RMSE_values_dict[model_id_list[i]+'_'+data_type_list[i]] = NN_metrics_results[validation_seq_or_test][0]['RMSE']
+            pearson_values_dict[model_id_list[i]+'name'+data_type_list[i]] = NN_metrics_results[validation_seq_or_test][0]['pearson']
+            RMSE_values_dict[model_id_list[i]+'name'+data_type_list[i]] = NN_metrics_results[validation_seq_or_test][0]['RMSE']
     ########################################################################################
 
     ########################load pearson values of the RF and lasso models##################

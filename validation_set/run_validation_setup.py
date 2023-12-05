@@ -1,7 +1,11 @@
+import sys
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+
+from load_data import matrix_generator
 
 
 # from sklearn.linear_model import LinearRegression
@@ -115,4 +119,15 @@ def make_plot(X, y, name, constant_func_opt, intersection_point_opt,
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    path_to_samples = sys.argv[1]
+    path_to_responses = sys.argv[2]
+    name_of_output_file = sys.argv[3]
+    f = pd.read_csv(path_to_samples, delimiter='\t', index_col=0,
+                    names=['id', 'seq'])
+    responses = pd.read_csv(path_to_responses, delimiter='\t', index_col=0,
+                            names=['id', 'half life 0A', 'half life 40A'])
+    responses['degradation rate'] = round(np.log(2) / -1 * responses['half life 0A'], 4)
+    kmer_matrix = matrix_generator(f, responses, 3, 7)
+    kmer_matrix.to_csv(f"{name_of_output_file}.csv", index=True)
+
