@@ -55,7 +55,7 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
     alphas: Dict[str, List[float]] = {'alpha': alphas}
 
     # cross validation model
-    folds, n_jobs = 5, 4
+    folds, n_jobs = 10, 4
     file.write(f"Number of folds: {folds} (n_jobs = {n_jobs})\n")
     grid_search = GridSearchCV(lasso_model, alphas, cv=folds, n_jobs=4,
                                scoring='neg_mean_squared_error', verbose=3)
