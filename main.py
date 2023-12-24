@@ -106,15 +106,15 @@ def argument_parser(args: List[str], generate_model: bool):
 def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
                                file):
     prediction = _model.predict(X_test)
-    mse = mean_squared_error(y_test, prediction)
-    r = np.round(np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0,1],3)
-
+    mse = mean_squared_error(y_test, prediction[:, 0])
+    r = np.round(np.corrcoef(y_test, prediction[:, 0])[0,1],3)
+    # ['degradation rate']
     file.write(f"MSE of the Linear regression = {round(mse,3)}\n")
     file.write(f"r of the Linear regression = {r}\n")
 
     print("******** Save the results ********", flush=True)
     prediction_df = pd.DataFrame(
-        {'True_Degradation_Rate': y_test['degradation rate'],
+        {'True_Degradation_Rate': y_test,
          'Predicted_Degradation_Rate': prediction[:, 0]})
     prediction_df.to_csv(f"{_name_of_model}_results.csv",
                          index=False)
