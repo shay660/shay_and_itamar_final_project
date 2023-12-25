@@ -31,6 +31,6 @@ if __name__ == '__main__':
     # Concatenate the new_columns DataFrame with the original data DataFrame
     data = pd.concat([new_columns, data], axis=1)
     predict_and_calculate_loss(model, data[model.feature_names_in_],
-                               data.iloc[:, - 1], name, file)
+                               data.iloc[:, -3:], name, file)
     file.close()
 

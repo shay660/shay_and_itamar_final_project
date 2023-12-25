@@ -106,15 +106,15 @@ def argument_parser(args: List[str], generate_model: bool):
 def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
                                file):
     prediction = _model.predict(X_test)
-    mse = mean_squared_error(y_test, prediction[:, 0])
-    r = np.round(np.corrcoef(y_test, prediction[:, 0])[0,1],3)
-    # ['degradation rate']
+    mse = mean_squared_error(y_test['degradation rate'], prediction[:, 0])
+    r = np.round(np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0,1],3)
+
     file.write(f"MSE of the Linear regression = {round(mse,3)}\n")
     file.write(f"r of the Linear regression = {r}\n")
 
     print("******** Save the results ********", flush=True)
     prediction_df = pd.DataFrame(
-        {'True_Degradation_Rate': y_test,
+        {'True_Degradation_Rate': y_test['degradation rate'],
          'Predicted_Degradation_Rate': prediction[:, 0]})
     prediction_df.to_csv(f"{_name_of_model}_results.csv",
                          index=False)
@@ -156,11 +156,12 @@ def make_heatmap_plot(X, y, r, _name_of_model):
     plt.savefig(f"{_name_of_model}_plot.png")
 
 
-if __name__ == '__main__':
+def main():
     start = time()
     to_generate_model: bool = len(sys.argv) > 5
-    model_to_run, alphas, name_of_file, name_of_model, path_to_samples, path_to_responses, min_length_kmer,\
-        max_length_kmer = argument_parser(sys.argv, to_generate_model)
+    model_to_run, alphas, name_of_file, name_of_model, path_to_samples, \
+        path_to_responses, min_length_kmer, max_length_kmer = \
+        argument_parser(sys.argv, to_generate_model)
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     directory_name = f"./models/{name_of_model}name{timestamp}"
     mkdir(directory_name)
@@ -169,8 +170,9 @@ if __name__ == '__main__':
                                                          model_to_run,
                                                          path_to_response=path_to_responses,
                                                          path_to_samples=path_to_samples,
-                                                         name_of_file=name_of_file, min_length_kmer= min_length_kmer,
-                                                         max_length_kmer= max_length_kmer)
+                                                         name_of_file=name_of_file,
+                                                         min_length_kmer=min_length_kmer,
+                                                         max_length_kmer=max_length_kmer)
     chdir(directory_name)
     file = open("summary.txt", "w")
     file.write(f"Model {name_of_model}\n")
@@ -186,5 +188,9 @@ if __name__ == '__main__':
     file.close()
     end = time()
     print(f"************ \ntime = {end - start}", flush=True)
+
+
+if __name__ == '__main__':
+    main()
 
 
