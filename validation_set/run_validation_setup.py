@@ -129,6 +129,8 @@ if __name__ == '__main__':
                             names=['id', 'half life 0A', 'half life 40A'])
     responses['degradation rate'] = round(np.log(2) /
                                           -1 * responses['half life 0A'], 4)
+    responses['x0'] = 0
+    responses['t0'] = 0
     kmer_matrix = matrix_generator(f, responses, 3, 7)
     kmer_matrix.to_csv(f"{name_of_output_file}.csv", index=True)
 
