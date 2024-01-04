@@ -127,7 +127,7 @@ if __name__ == '__main__':
                     names=['id', 'seq'])
     responses = pd.read_csv(path_to_responses, delimiter='\t', index_col=0,
                             names=['id', 'half life 0A', 'half life 40A'])
-    responses['degradation rate'] = round(np.log(2) /
+    responses['degradation rate'] = round(10*np.log(2) /
                                           -1 * responses['half life 0A'], 4)
     responses['x0'] = 0
     responses['t0'] = 0
