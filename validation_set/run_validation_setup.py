@@ -119,6 +119,7 @@ def make_plot(X, y, name, constant_func_opt, intersection_point_opt,
 
 
 if __name__ == '__main__':
+    #help
     # main()
     path_to_samples: str = sys.argv[1]
     path_to_responses: str = sys.argv[2]

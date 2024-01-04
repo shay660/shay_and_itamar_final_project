@@ -81,8 +81,7 @@ optional arguments:
   --input_A_minus_initial INPUT_A_MINUS_INITIAL
                         Path of the A- initial mRNA level input for mRNA
                         degradation dynamics models. Used only for predicting.
-                        None default path is provided.
-  --input_A_plus_initial INPUT_A_PLUS_INITIAL
+c  --input_A_plus_initial INPUT_A_PLUS_INITIAL
                         Path of the A+ initial mRNA level input for mRNA
                         degradation dynamics models. Used only for predicting.
                         None default path is provided.
