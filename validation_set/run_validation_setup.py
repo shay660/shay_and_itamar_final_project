@@ -120,17 +120,19 @@ def make_plot(X, y, name, constant_func_opt, intersection_point_opt,
 
 if __name__ == '__main__':
     # main()
-    path_to_samples = sys.argv[1]
-    path_to_responses = sys.argv[2]
-    name_of_output_file = sys.argv[3]
-    f = pd.read_csv(path_to_samples, delimiter='\t', index_col=0,
-                    names=['id', 'seq'])
-    responses = pd.read_csv(path_to_responses, delimiter='\t', index_col=0,
-                            names=['id', 'half life 0A', 'half life 40A'])
-    responses['degradation rate'] = round(np.log(2) /
-                                          -1 * responses['half life 0A'], 4)
+    path_to_samples: str = sys.argv[1]
+    path_to_responses: str = sys.argv[2]
+    name_of_output_file: str = sys.argv[3]
+    f: pd.DataFrame = pd.read_csv(path_to_samples, delimiter='\t', index_col=0,
+                                        names=['id', 'seq'])
+    responses: pd.DataFrame = pd.read_csv(path_to_responses, delimiter='\t',
+                                          index_col=0,
+                                          names=['id', 'half life 0A',
+                                                 'half life 40A'])
+    deg_rate_from_half_life: pd.Series = np.log(2) / responses['half life 0A']
+    log2_of_deg_rate: pd.Series = np.log2(deg_rate_from_half_life)
+    responses['degradation rate'] = round(log2_of_deg_rate, 4)
     responses['x0'] = 0
     responses['t0'] = 0
     kmer_matrix = matrix_generator(f, responses, 3, 7)
     kmer_matrix.to_csv(f"{name_of_output_file}.csv", index=True)
-
