@@ -158,7 +158,7 @@ def dynamics_model_path_decoder(args, data_type):
             model_path = general_utilies.files_dir+'saved_models_8_disjoint/ensemble/'
         else:
             model_path = general_utilies.files_dir+'saved_models_linear_disjoint/ensemble/'
-        model_path = model_path + args.model_type+'_'+data_type+'_'+args.NN_type+'/'
+        model_path = model_path + args.model_type+'name'+data_type+'name'+args.NN_type+'/'
     if (model_path[-1] == '/'):
         model_path = glob.glob(model_path+"*") # list of all fiels in the directory
     
