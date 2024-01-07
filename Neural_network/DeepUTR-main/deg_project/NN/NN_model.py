@@ -82,12 +82,12 @@ def model_creation_and_fit (train_set_wrapper,  validation_set_wrapper, model_ty
     if(model_params['lr_scheduler'] == True):
        callbacks.append(tf.keras.callbacks.LearningRateScheduler(scheduler))
     if (model_params['tensor_board'] == True):
-        logdir = os.path.join(general_utilies.files_dir+"logs", model_type+'_'+data_type+'_'+model_id_and_timestamp)
+        logdir = os.path.join(general_utilies.files_dir+"logs", model_type+'name'+data_type+'name'+model_id_and_timestamp)
         callbacks.append(tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1))
     if (model_params['early_stooping_patience']>0):
         callbacks.append(tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=model_params['early_stooping_patience'], min_delta=model_params['early_stooping_min_delta'],  verbose=1, restore_best_weights=True))
     if(model_params['model_checkpoint'] == True):
-        dir_path = general_utilies.files_dir+"models_chekpoints/"+model_type+'_'+data_type+'_'+model_id_and_timestamp
+        dir_path = general_utilies.files_dir+"models_chekpoints/"+model_type+'name'+data_type+'name'+model_id_and_timestamp
         Path(dir_path).mkdir(parents=True, exist_ok=True)
         filepath = dir_path+"/"+"saved-model-{epoch:02d}-{val_loss:.2f}.hdf5"
         callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1))
