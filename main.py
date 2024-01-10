@@ -184,7 +184,7 @@ def main():
     args = argument_parser()
 
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    directory_name = f"./models/{args.name_of_model}name{timestamp}"
+    directory_name = f"./models/{args.name_of_model}_{timestamp}"
     mkdir(directory_name)
 
     samples_to_run: pd.DataFrame = save_or_upload_matrix(
