@@ -201,7 +201,6 @@ def data_type_decoder(args):
     return data_type
     
 def main():
-    err
     args = parser_func()
     data_type = data_type_decoder(args)
     if (args.train == 1):
