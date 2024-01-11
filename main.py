@@ -138,39 +138,35 @@ def argument_parser():
     :param generate_model: boolean flag
     :return: parsed arguments
     """
-    # _model_to_run: int = int(args[1])
-    # _alphas: List[float] = [float(x) for x in args[2].split(",")]
-    # _name_of_file: str = args[3]
-    # _name_of_model: str = args[4]
-    # _path_to_samples = args[5] if generate_model else None
-    # _path_to_responses = args[6] if generate_model else None
-    # _min_length_kmer = int(sys.argv[7]) if generate_model else None
-    # _max_length_kmer = int(sys.argv[8]) if generate_model else None
-    #
-    # return _model_to_run, _alphas, _name_of_file, _name_of_model, \
-    #     _path_to_samples, _path_to_responses, _min_length_kmer, _max_length_kmer
-
-    parser = argparse.ArgumentParser(description="Description of your program")
+    parser = argparse.ArgumentParser(description="The script design to predict "
+                                                 "degradation rate of mRNA in the cell "
+                                                 "according to it's sequence "
+                                                 "using linear regression model.")
 
     parser.add_argument('--model_to_run', type=int,
-                        help="Description of _model_to_run")
+                        help="model_to_run - int from 1-4 such that:"
+                             "1 - late-onset with polyA tail model."
+                             "2 - late-onset without polyA tail model."
+                             "3 - early-onset with polyA tail model."
+                             "4 - early-onset without polyA tail model.")
     parser.add_argument('--alphas', type=lambda arg: list(map(float,
                                                               arg.split(','))),
                         help="alphas for the lass, separated by commas")
-    parser.add_argument('--name_of_file', type=str,
-                        help="Description of _name_of_file")
+    parser.add_argument('--name_of_matrix', type=str,
+                        help="A name by which you will read the Kmer matrix "
+                             "or open an existing one")
     parser.add_argument('--name_of_model', type=str,
-                        help="Description of _name_of_model")
+                        help="Name of the new model")
     parser.add_argument('--path_to_samples', type=str, default=None,
-                        help="Description of _path_to_samples")
+                        help="Path to samples (sequences) file.")
     parser.add_argument('--path_to_responses', type=str, default=None,
-                        help="Description of _path_to_responses")
+                        help="Path to responses file.")
     parser.add_argument('--min_length_kmer', type=int, default=None,
-                        help="Description of _min_length_kmer")
+                        help="The length of the min kmer to look for.")
     parser.add_argument('--max_length_kmer', type=int, default=None,
-                        help="Description of _max_length_kmer")
+                        help="The length of the max kmer to look for.")
     parser.add_argument('--to_generate_matrix', type=bool, default=False,
-                        help="if True generate a new matrix", )
+                        help="If True generate a new matrix", )
     return parser.parse_args()
 
 
