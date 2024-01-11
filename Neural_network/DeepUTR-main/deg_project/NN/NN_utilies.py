@@ -75,7 +75,7 @@ def run_IG (model, one_hot_features, intial_features=None, target_range=None, ou
 
 def compute_IG_PWM (model, validate_seq_path, validate_labels_path_minus, validate_labels_path_plus, model_type, model_id, data_type, target_range=None,
                     output_pdf=False, pdf_dir=''):
-    output_pdf_name = pdf_dir+model_id+'name'+data_type+'_gradient_'+str('all_outputs' if target_range is None else target_range)+'.pdf' if output_pdf else None
+    output_pdf_name = pdf_dir+model_id+'_'+data_type+'_gradient_'+str('all_outputs' if target_range is None else target_range)+'.pdf' if output_pdf else None 
 
     validation_set = NN_load_datasets.load_dataset_model_type (seq_path=validate_seq_path, labels_path_minus=validate_labels_path_minus,
                                                                labels_path_plus=validate_labels_path_plus, model_type=model_type,
@@ -174,7 +174,7 @@ def IG_test (test_type, tested_models_actucal_IG_list, model_id_list, data_type_
             print("id ", i,": ", index, value)
     
     target_range_list = ['all_outputs' if target_range is None else target_range for  target_range in target_range_list]
-    output_names = [model_id_list[i]+'name'+data_type_list[i]+'_gradient_'+str(target_range_list[i]) for i in range(num_of_models)]
+    output_names = [model_id_list[i]+'_'+data_type_list[i]+'_gradient_'+str(target_range_list[i]) for i in range(num_of_models)]
 
     test_metric_results = []
     for i in range(num_of_models):

@@ -97,7 +97,7 @@ def train_and_evalute (train_set_wrapper, validation_set_wrapper, test_set_wrapp
         general_utilies.releaseLock(locked_file_descriptor)
     #save model if requested
     if(save_model_path is not None):
-        model.save(save_model_path+model_type+'name'+data_type+'name'+model_id_and_timestamp+'.h5')
+        model.save(save_model_path+model_type+'_'+data_type+'_'+model_id_and_timestamp+'.h5')
     
     return model
  ################################################################################### 
@@ -166,7 +166,7 @@ def evaluate_model_type (model_path, seq_path, labels_path_minus, labels_path_pl
     test_predicted = test_predicted/model_num
     if (only_predict):
         Path(output_path).mkdir(parents=True, exist_ok=True) #create directory if not exists
-        np.savetxt(output_path+'predictions_'+model_id+'name'+model_type+'name'+data_type+'.csv', test_predicted, delimiter=",")
+        np.savetxt(output_path+'predictions_'+model_id+'_'+model_type+'_'+data_type+'.csv', test_predicted, delimiter=",")
         return
 
     results_dict = {}
@@ -236,7 +236,7 @@ def evaluate_TF_modisco (model_path, seq_path, labels_path_minus, labels_path_pl
         #zip output folder
         modisco_path = general_utilies.files_dir+'modisco_files/'
         zip_name_initial = modisco_path+'output_files/modisco_output_ensemnle_' if type(model_path) is list else modisco_path+'output_files/modisco_output_'
-        zipf = TF_modisco.zipfile.ZipFile(zip_name_initial+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+'name'+model_id+'name'+data_type+'name'+str('all_outputs' if target_range_list[i] is None else target_range_list[i])+'name'+test_validation_train_or_all_set+'_set.zip', 'w', TF_modisco.zipfile.ZIP_DEFLATED)
+        zipf = TF_modisco.zipfile.ZipFile(zip_name_initial+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+'_'+model_id+'_'+data_type+'_'+str('all_outputs' if target_range_list[i] is None else target_range_list[i])+'_'+test_validation_train_or_all_set+'_set.zip', 'w', TF_modisco.zipfile.ZIP_DEFLATED)
         TF_modisco.zipdir(modisco_path+'modisco_out/', zipf)
         zipf.close()
         #clean folder

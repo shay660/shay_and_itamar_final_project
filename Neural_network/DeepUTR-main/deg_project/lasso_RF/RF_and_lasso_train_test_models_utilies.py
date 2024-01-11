@@ -165,7 +165,7 @@ def train_test_validate_lasso_or_RF_model (
         print("##############A-###############")
         model_minus = train_and_evluate(train_set_wrapper_minus, test_set_wrapper_minus, validation_seq_wrapper_minus, model_type, lasso_or_RF)
         if save_model_path is not None:
-            general_utilies.pickle.dump(model_minus, open(save_model_path+lasso_or_RF+'name'+model_type+'name'+'A_minus'+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+".sav", 'wb'))
+            general_utilies.pickle.dump(model_minus, open(save_model_path+lasso_or_RF+'_'+model_type+'_'+'A_minus'+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+".sav", 'wb'))
     else:
         model_minus = None
     
@@ -173,7 +173,7 @@ def train_test_validate_lasso_or_RF_model (
         print("##############A+###############")
         model_plus = train_and_evluate(train_set_wrapper_plus, test_set_wrapper_plus, validation_seq_wrapper_plus, model_type, lasso_or_RF)
         if save_model_path is not None:
-            general_utilies.pickle.dump(model_plus, open(save_model_path+lasso_or_RF+'name'+model_type+'name'+'A_plus'+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+".sav", 'wb'))
+            general_utilies.pickle.dump(model_plus, open(save_model_path+lasso_or_RF+'_'+model_type+'_'+'A_plus'+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+".sav", 'wb'))
     else:
         model_plus = None
         
