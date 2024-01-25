@@ -188,7 +188,7 @@ def main():
         args.model_to_run,
         path_to_response=args.path_to_responses,
         path_to_samples=args.path_to_samples,
-        name_of_file=args.name_of_file,
+        name_of_file=args.name_of_matrix,
         min_length_kmer=args.min_length_kmer,
         max_length_kmer=args.max_length_kmer)
     chdir(directory_name)
