@@ -7,6 +7,7 @@ from typing import Tuple, List
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
 from load_data import matrix_generator
 from model_generator import linear_reg_model_generator, \
@@ -76,7 +77,7 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
 
 
 def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
-                               file):
+                               file) -> None:
     prediction = _model.predict(X_test)
     mse = mean_squared_error(y_test['degradation rate'], prediction[:, 0])
     r = np.round(
@@ -134,8 +135,6 @@ def make_heatmap_plot(X, y, r, _name_of_model):
 def argument_parser():
     """
     parse given command line arguments
-    :param args: command line arguments
-    :param generate_model: boolean flag
     :return: parsed arguments
     """
     parser = argparse.ArgumentParser(description="The script design to predict "
@@ -170,12 +169,31 @@ def argument_parser():
     return parser.parse_args()
 
 
+def find_significant_kmers(model: LinearRegression) -> None:
+    """
+    Identify and save the most significant features (columns) based on a trained
+    linear regression model.
+    :param model: (LinearRegression): Trained linear regression model.
+    Saves:
+    - A CSV file named "most_significant_kmers" containing the most significant
+     features.
+    """
+    coefficients = model.coef_
+    weights_norms = np.linalg.norm(coefficients, axis=0)
+    columns_names = model.feature_names_in_
+
+    coefficients_df = pd.DataFrame(
+        {'kmers': columns_names, 'weights_norms': weights_norms})
+
+    sorted_coefficients_df = coefficients_df.sort_values(
+        by='weights_norms', ascending=False)
+
+    # Extract the most significant features (columns)
+    sorted_coefficients_df.to_csv("most_significant_kmers.csv")
+
+
 def main():
     start = time()
-    # to_generate_model: bool = len(sys.argv) > 5
-    # model_to_run, alphas, name_of_file, name_of_model, path_to_samples, \
-    #     path_to_responses, min_length_kmer, max_length_kmer = \
-    #     argument_parser(sys.argv, to_generate_model)
 
     args = argument_parser()
 
@@ -188,9 +206,10 @@ def main():
         args.model_to_run,
         path_to_response=args.path_to_responses,
         path_to_samples=args.path_to_samples,
-        name_of_file=args.name_of_file,
+        name_of_file=args.name_of_matrix,
         min_length_kmer=args.min_length_kmer,
         max_length_kmer=args.max_length_kmer)
+
     chdir(directory_name)
     file = open("summary.txt", "w")
     file.write(f"Model {args.name_of_model}\n")
@@ -202,6 +221,8 @@ def main():
 
     predict_and_calculate_loss(model, X_train, y_train, args.name_of_model,
                                file)
+    find_significant_kmers(model, X_train)
+
     dump(model, f"{args.name_of_model}_model.joblib")
 
     file.close()
