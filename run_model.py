@@ -3,7 +3,7 @@ from os import mkdir, chdir
 import datetime
 import joblib
 import pandas as pd
-from main import predict_and_calculate_loss
+from main import predict_and_calculate_loss, find_significant_kmers
 
 
 def main():
@@ -18,6 +18,7 @@ def main():
     file.write(f"Model {name}\n")
     file.write(f"Run at {timestamp}\n")
     model_features = model.feature_names_in_
+    find_significant_kmers(model)
     new_columns = pd.DataFrame({feat: [0] for feat in model_features},
                                index=data.index)
     # Select only the columns that do not already exist in the data DataFrame

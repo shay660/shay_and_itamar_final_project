@@ -1,4 +1,3 @@
-import sys
 from typing import Dict, List, Tuple
 
 import pandas as pd
@@ -38,7 +37,7 @@ def _split_to_train_and_test(samples: pd.DataFrame, file):
 
 def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
                                          file) \
-        -> Tuple[object, pd.DataFrame, pd.Series]:
+        -> Tuple[LinearRegression, pd.DataFrame, pd.Series]:
     """
     Generate and evaluate a predictive model using Lasso regression followed by
     Linear Regression.
@@ -76,7 +75,8 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
     file.write(f"Number of features used by the Lasso: {n_features}\n")
     # creates a linear regression model with the features as the non-zero
     # coefficients of the lasso
-    linear_reg_model = LinearRegression().fit(X_train, y_train)
+    linear_reg_model: LinearRegression = LinearRegression()
+    linear_reg_model.fit(X_train, y_train)
     print(f"**** Linear Regression Fitted ****", flush=True)
 
     return linear_reg_model, X_train, y_train  # X_test, y_test
