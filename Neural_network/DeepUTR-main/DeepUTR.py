@@ -3,7 +3,7 @@ import glob
 from deg_project.general import general_utilies
 from deg_project.NN import NN_train_test_models_utilies
 from deg_project.lasso_RF import RF_and_lasso_train_test_models_utilies
-from deg_project.NN.TF_modisco import generate_modisco_dataset
+from deg_project.NN.TF_modisco import generate_modisco_dataset, run_modisco
 
 
 def parser_func():
@@ -15,7 +15,7 @@ def parser_func():
                         help="Perform model type prediction. Avilable only for NN models. Options: '0' (default) - do not perform prediction. '1' - perform prediction.")
     parser.add_argument('--evaluate', type=int, default=0,
                         help="Perform model type evaluation. Options: '0' (default) - do not perform evaluation. '1' - perform evaluation.")
-    parser.add_argument("--generate_TF_modisco_params", type=int, default=0,
+    parser.add_argument("--generate_TF_modisco", type=int, default=0,
                         help="Generate parameters to the run TF_modisco")
     parser.add_argument('--model_type', type=str, default='dynamics',
                         help="Model_type. Options: 'dynamics' (default) - mRNA degradation dynamics model. 'rate' - mRNA degradation rate model.")
@@ -63,7 +63,7 @@ def parser_func():
 
 def train(args, data_type):
     index_for_split = None if (
-                args.input_split_indices == 'false' or args.input_split_indices == 'random') else args.input_split_indices  # Random split if args.input_split_indices is 'false' or 'random
+            args.input_split_indices == 'false' or args.input_split_indices == 'random') else args.input_split_indices  # Random split if args.input_split_indices is 'false' or 'random
 
     if (args.conventional_model == 'false'):
         model_id = dynamics_model_id_decoder(args)
@@ -237,17 +237,19 @@ def main():
     elif (args.predict == 1):
         print("performing prediction")
         predict(args, data_type)
-    elif args.generate_TF_modisco_params == 1:
-        generate_modisco_dataset(model_path=args.input_model_path_1,
-                                 seq_path=args.input_sequences,
-                                 labels_path_plus=args.input_A_plus_labels,
-                                 labels_path_minus=args.input_A_minus_labels,
-                                 model_id=args.model_id,
-                                 model_type=args.model_type,
-                                 data_type=data_type,
-                                 target_range=None,
-                                 test_validation_train_or_all_set='test',
-                                 save_path=args.output_path)
+    elif args.generate_TF_modisco == 1:
+        modisco_dataset = generate_modisco_dataset(
+            model_path=args.input_model_path_1,
+            seq_path=args.input_sequences,
+            labels_path_plus=args.input_A_plus_labels,
+            labels_path_minus=args.input_A_minus_labels,
+            model_id=args.model_id,
+            model_type=args.model_type,
+            data_type=data_type,
+            target_range=None,
+            test_validation_train_or_all_set='test')
+        run_modisco(modisco_dataset[0], modisco_dataset[1], modisco_dataset[
+            2], modisco_dataset[3])
     else:
         raise ValueError(
             'None of the arguments train, evaluate, and predict got Valid input')
