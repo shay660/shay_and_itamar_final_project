@@ -235,7 +235,7 @@ def main():
     elif (args.predict == 1):
         print("performing prediction")
         predict(args, data_type)
-    elif args.generate_TF_modisco_parms == 1:
+    elif args.generate_TF_modisco_params == 1:
         generate_modisco_dataset(model_path=args.input_model_path_1,
                                  seq_path=args.input_sequences,
                                  labels_path_plus=args.input_A_plus_labels,
