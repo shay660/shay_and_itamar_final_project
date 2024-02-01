@@ -54,6 +54,8 @@ def parser_func():
     parser.add_argument('--output_path', type=str,
                         default=general_utilies.files_dir,
                         help="Path for the outputs. Default path is the files dirctory of DeepUTR.")
+    parser.add_argument("--model_id", type=str, default=None,
+                        help="The name of the model when saving.")
     args = parser.parse_args()
 
     return args
@@ -240,11 +242,12 @@ def main():
                                  seq_path=args.input_sequences,
                                  labels_path_plus=args.input_A_plus_labels,
                                  labels_path_minus=args.input_A_minus_labels,
-                                 model_id=args.output_path,
+                                 model_id=args.model_id,
                                  model_type=args.model_type,
                                  data_type=data_type,
                                  target_range=None,
-                                 test_validation_train_or_all_set='test')
+                                 test_validation_train_or_all_set='test',
+                                 save_path=args.output_path)
     else:
         raise ValueError(
             'None of the arguments train, evaluate, and predict got Valid input')
