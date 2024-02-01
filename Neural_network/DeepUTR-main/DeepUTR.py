@@ -3,16 +3,20 @@ import glob
 from deg_project.general import general_utilies
 from deg_project.NN import NN_train_test_models_utilies
 from deg_project.lasso_RF import RF_and_lasso_train_test_models_utilies
+from deg_project.NN.TF_modisco import generate_modisco_dataset
+
 
 def parser_func():
-    parser = argparse.ArgumentParser(description="DeepUTR - train, predict, or evaluate. Note: folder path must end with '/'")
+    parser = argparse.ArgumentParser(
+        description="DeepUTR - train, predict, or evaluate. Note: folder path must end with '/'")
     parser.add_argument('--train', type=int, default=0,
                         help="Perform model type training. Options: '0' (default) - do not perform training. '1' - perform training.")
     parser.add_argument('--predict', type=int, default=0,
                         help="Perform model type prediction. Avilable only for NN models. Options: '0' (default) - do not perform prediction. '1' - perform prediction.")
     parser.add_argument('--evaluate', type=int, default=0,
                         help="Perform model type evaluation. Options: '0' (default) - do not perform evaluation. '1' - perform evaluation.")
-
+    parser.add_argument("--generate_TF_modisco_params", type=int, default=0,
+                        help="Generate parameters to the run TF_modisco")
     parser.add_argument('--model_type', type=str, default='dynamics',
                         help="Model_type. Options: 'dynamics' (default) - mRNA degradation dynamics model. 'rate' - mRNA degradation rate model.")
     parser.add_argument('--NN_type', type=str, default='CNN',
@@ -27,7 +31,8 @@ def parser_func():
     parser.add_argument('--input_model_path_2', type=str, default="false",
                         help="Used only for conventional models. Path of the model A+ model. If needed you must provide this model path")
 
-    parser.add_argument('--input_sequences', type=str, default=general_utilies.seq_PATH,
+    parser.add_argument('--input_sequences', type=str,
+                        default=general_utilies.seq_PATH,
                         help="Path of the sequences input. Default path is the UTR-seq dataset sequences.")
 
     parser.add_argument('--input_A_minus_initial', type=str, default='false',
@@ -35,26 +40,32 @@ def parser_func():
     parser.add_argument('--input_A_plus_initial', type=str, default='false',
                         help="Path of the A+ initial mRNA level input for mRNA degradation dynamics models. Used only for predicting. None default path is provided.")
 
-    parser.add_argument('--input_A_minus_labels', type=str, default=general_utilies.A_minus_normalized_levels_PATH,
+    parser.add_argument('--input_A_minus_labels', type=str,
+                        default=general_utilies.A_minus_normalized_levels_PATH,
                         help="Path of the A- labels input. Used for training and evaluation. Default path is the UTR-seq A- dataset labels.")
-    parser.add_argument('--input_A_plus_labels', type=str, default=general_utilies.A_plus_normalized_levels_PATH,
+    parser.add_argument('--input_A_plus_labels', type=str,
+                        default=general_utilies.A_plus_normalized_levels_PATH,
                         help="Path of the A+ labels input. Used for training and evaluation. Default path is the UTR-seq A+ dataset labels.")
 
-    parser.add_argument('--input_split_indices', type=str, default=general_utilies.split_to_train_validation_test_disjoint_sets_ids_PATH,
+    parser.add_argument('--input_split_indices', type=str,
+                        default=general_utilies.split_to_train_validation_test_disjoint_sets_ids_PATH,
                         help="Path of the file containing indices of splitting the dataset for train, validation, and test. Used for training and evaluation. Options: 'false' - do not split the dataset (in this case, in training, the dataset will be splitted randomly). 'random' - random split (see code for detailes). Default option is the path of the file containing indices of splitting the UTR-seq dataset.")
 
-    parser.add_argument('--output_path', type=str, default=general_utilies.files_dir,
+    parser.add_argument('--output_path', type=str,
+                        default=general_utilies.files_dir,
                         help="Path for the outputs. Default path is the files dirctory of DeepUTR.")
     args = parser.parse_args()
 
     return args
 
+
 def train(args, data_type):
-    index_for_split = None if (args.input_split_indices=='false' or args.input_split_indices=='random') else args.input_split_indices # Random split if args.input_split_indices is 'false' or 'random
-    
+    index_for_split = None if (
+                args.input_split_indices == 'false' or args.input_split_indices == 'random') else args.input_split_indices  # Random split if args.input_split_indices is 'false' or 'random
+
     if (args.conventional_model == 'false'):
         model_id = dynamics_model_id_decoder(args)
-        NN_train_test_models_utilies.train_test_validate_model_type (
+        NN_train_test_models_utilies.train_test_validate_model_type(
             seq_path=args.input_sequences,
             labels_path_minus=args.input_A_minus_labels,
             labels_path_plus=args.input_A_plus_labels,
@@ -65,7 +76,8 @@ def train(args, data_type):
             index_for_split=index_for_split
         )
     else:
-        labels_path_minus, labels_path_plus = rate_model_labels_decoder(args, data_type)
+        labels_path_minus, labels_path_plus = rate_model_labels_decoder(args,
+                                                                        data_type)
         RF_and_lasso_train_test_models_utilies.train_test_validate_lasso_or_RF_model(
             seq_path=args.input_sequences,
             labels_path_minus=labels_path_minus,
@@ -76,10 +88,11 @@ def train(args, data_type):
             save_model_path=args.output_path
         )
 
+
 def evaluate(args, data_type):
     if args.input_split_indices != 'false':
         split = True
-        index_for_split = None if args.input_split_indices=='random' else args.input_split_indices # Random split if args.input_split_indices=='random'
+        index_for_split = None if args.input_split_indices == 'random' else args.input_split_indices  # Random split if args.input_split_indices=='random'
     else:
         split = False
         index_for_split = None
@@ -87,7 +100,7 @@ def evaluate(args, data_type):
     if (args.conventional_model == 'false'):
         model_id = dynamics_model_id_decoder(args)
         model_path = dynamics_model_path_decoder(args, data_type)
-        NN_train_test_models_utilies.evaluate_model_type (
+        NN_train_test_models_utilies.evaluate_model_type(
             model_path=model_path,
             seq_path=args.input_sequences,
             labels_path_minus=args.input_A_minus_labels,
@@ -97,11 +110,13 @@ def evaluate(args, data_type):
             data_type=data_type,
             index_for_split=index_for_split,
             split=split
-            )
+        )
     else:
-        labels_path_minus, labels_path_plus = rate_model_labels_decoder(args, data_type)
-        model_A_minus_path, model_A_plus_path = rate_model_path_decoder(args, data_type)
-        RF_and_lasso_train_test_models_utilies.evaluate_lasso_or_RF_model (
+        labels_path_minus, labels_path_plus = rate_model_labels_decoder(args,
+                                                                        data_type)
+        model_A_minus_path, model_A_plus_path = rate_model_path_decoder(args,
+                                                                        data_type)
+        RF_and_lasso_train_test_models_utilies.evaluate_lasso_or_RF_model(
             model_A_minus_path=model_A_minus_path,
             model_A_plus_path=model_A_plus_path,
             seq_path=args.input_sequences,
@@ -111,12 +126,13 @@ def evaluate(args, data_type):
             lasso_or_RF=args.conventional_model,
             split=split,
             index_for_split=index_for_split)
-            
+
+
 def predict(args, data_type):
     if (args.conventional_model == 'false'):
         model_id = dynamics_model_id_decoder(args)
         model_path = dynamics_model_path_decoder(args, data_type)
-        NN_train_test_models_utilies.evaluate_model_type (
+        NN_train_test_models_utilies.evaluate_model_type(
             model_path=model_path,
             seq_path=args.input_sequences,
             labels_path_minus=args.input_A_minus_labels,
@@ -127,22 +143,23 @@ def predict(args, data_type):
             only_predict=True,
             split=False,
             output_path=args.output_path
-            )
+        )
     else:
-        print ('We do not suporrt prediction option for the conventional models')
+        print('We do not suporrt prediction option for the conventional models')
+
 
 def dynamics_model_id_decoder(args):
     if (args.model_type == 'dynamics'):
         if (args.NN_type == 'CNN'):
             model_id = 'model_8_points_id_1'
-        elif(args.NN_type == 'RNN'):
+        elif (args.NN_type == 'RNN'):
             model_id = 'model_8_points_id_2'
         else:
             raise ValueError('invalid NN_type')
     elif (args.model_type == 'rate'):
         if (args.NN_type == 'CNN'):
             model_id = 'linear_model_points_id_1'
-        elif(args.NN_type == 'RNN'):
+        elif (args.NN_type == 'RNN'):
             model_id = 'linear_model_points_id_2'
         else:
             raise ValueError('invalid NN_type')
@@ -151,18 +168,21 @@ def dynamics_model_id_decoder(args):
 
     return model_id
 
+
 def dynamics_model_path_decoder(args, data_type):
     model_path = args.input_model_path_1
     if (model_path == "default"):
         if (args.model_type == 'dynamics'):
-            model_path = general_utilies.files_dir+'saved_models_8_disjoint/ensemble/'
+            model_path = general_utilies.files_dir + 'saved_models_8_disjoint/ensemble/'
         else:
-            model_path = general_utilies.files_dir+'saved_models_linear_disjoint/ensemble/'
-        model_path = model_path + args.model_type+'_'+data_type+'_'+args.NN_type+'/'
+            model_path = general_utilies.files_dir + 'saved_models_linear_disjoint/ensemble/'
+        model_path = model_path + args.model_type + '_' + data_type + '_' + args.NN_type + '/'
     if (model_path[-1] == '/'):
-        model_path = glob.glob(model_path+"*") # list of all fiels in the directory
-    
+        model_path = glob.glob(
+            model_path + "*")  # list of all fiels in the directory
+
     return model_path
+
 
 def rate_model_labels_decoder(args, data_type):
     if (data_type == '-' or data_type == '-+'):
@@ -176,6 +196,7 @@ def rate_model_labels_decoder(args, data_type):
 
     return labels_path_minus, labels_path_plus
 
+
 def rate_model_path_decoder(args, data_type):
     if (data_type == '-' or data_type == '-+'):
         model_A_minus_path = args.input_model_path_1
@@ -188,18 +209,20 @@ def rate_model_path_decoder(args, data_type):
 
     return model_A_minus_path, model_A_plus_path
 
+
 def data_type_decoder(args):
-    if(args.data_type == 'minus'):
+    if (args.data_type == 'minus'):
         data_type = '-'
-    elif(args.data_type == 'plus'):
+    elif (args.data_type == 'plus'):
         data_type = '+'
-    elif(args.data_type == 'minus_plus'):
+    elif (args.data_type == 'minus_plus'):
         data_type = data_type = '-+'
     else:
         raise ValueError('invalid data_type')
-    
+
     return data_type
-    
+
+
 def main():
     args = parser_func()
     data_type = data_type_decoder(args)
@@ -209,15 +232,23 @@ def main():
     elif (args.evaluate == 1):
         print("performing evaluation")
         evaluate(args, data_type)
-    elif(args.predict == 1):
+    elif (args.predict == 1):
         print("performing prediction")
         predict(args, data_type)
+    elif args.generate_TF_modisco_parms == 1:
+        generate_modisco_dataset(model_path=args.input_model_path_1,
+                                 seq_path=args.input_sequences,
+                                 labels_path_plus=args.input_A_plus_labels,
+                                 labels_path_minus=args.input_A_minus_labels,
+                                 model_id=args.output_path,
+                                 model_type=args.model_type,
+                                 data_type=data_type,
+                                 target_range=None,
+                                 test_validation_train_or_all_set='test')
     else:
-        raise ValueError('None of the arguments train, evaluate, and predict got Valid input') 
+        raise ValueError(
+            'None of the arguments train, evaluate, and predict got Valid input')
 
 
 if __name__ == "__main__":
     main()
-
-
-
