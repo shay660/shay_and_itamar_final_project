@@ -47,10 +47,10 @@ def savePattern(patten, filename, LEN=70):
 
 def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
     # import TF-MoDISco only here since it's distroying the tf 2 behavior
-    import modisco
+    from tfmodisco_master import modisco
     import modisco.visualization
     from modisco.visualization import viz_sequence
-
+    print("run modisco")
     # arrange null_distribution as input to the TF-MoDISco if null_distribution exists
     if (null_distribution is None):
         nulldist_args = {}
