@@ -463,7 +463,7 @@ class Seqlet(Pattern):
         self.coor = coor
         super(Seqlet, self).__init__()
 
-    def add_snippet_from_data_track(self, data_track): 
+    def add_snippet_from_data_track(self, data_track):
         snippet = data_track.get_snippet(coor=self.coor)
         return self.add_snippet(data_track_name=data_track.name,
                                 snippet=snippet)
