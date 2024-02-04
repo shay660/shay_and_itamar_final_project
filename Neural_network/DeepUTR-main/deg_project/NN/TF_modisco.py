@@ -48,8 +48,10 @@ def savePattern(patten, filename, LEN=70):
 def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
     # import TF-MoDISco only here since it's distroying the tf 2 behavior
     from tfmodisco_master import modisco
-    import modisco.visualization
-    from modisco.visualization import viz_sequence
+    import tfmodisco_master.modisco.visualization
+    from tfmodisco_master.modisco.visualization import viz_sequence
+    from tfmodisco_master.modisco import tfmodisco_workflow
+    from tfmodisco_master.modisco.seqlet_embedding import gapped_kmer
     print("run modisco")
     # arrange null_distribution as input to the TF-MoDISco if null_distribution exists
     if (null_distribution is None):
@@ -61,7 +63,7 @@ def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
         nulldist_args = {'null_per_pos_scores': {'task0': nulldist_perposimp}}
 
     # Run TF-MoDISco
-    tfmodisco_results = modisco.tfmodisco_workflow.workflow.TfModiscoWorkflow(
+    tfmodisco_results = tfmodisco_workflow.workflow.TfModiscoWorkflow(
         # Slight modifications from the default settings
         target_seqlet_fdr=0.25,
         seqlets_to_patterns_factory=

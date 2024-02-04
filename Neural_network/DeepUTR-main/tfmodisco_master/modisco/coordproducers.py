@@ -1,6 +1,6 @@
 from __future__ import division, print_function, absolute_import
 from .core import SeqletCoordinates
-from modisco import util
+from tfmodisco_master.modisco import util
 import numpy as np
 from collections import defaultdict, Counter, OrderedDict
 import itertools
