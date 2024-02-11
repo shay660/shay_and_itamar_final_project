@@ -12,13 +12,15 @@ from . import util
 from .value_provider import AbstractValueProvider
 from joblib import Parallel, delayed
 
-
+counter = 0
 class Snippet(object):
 
     def __init__(self, fwd, rev, has_pos_axis):
         if (rev is not None):
             print(f"fws: {fwd}", flush=True)
             print(f"rev: {rev}", flush=True)
+            counter=+1
+            print(f"************   {counter}   ************ \n")
             assert len(fwd)==len(rev),str(len(fwd))+" "+str(len(rev))
         self.fwd = fwd
         self.rev = rev
