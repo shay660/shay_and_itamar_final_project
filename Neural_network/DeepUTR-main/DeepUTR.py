@@ -184,7 +184,7 @@ def dynamics_model_path_decoder(args, data_type):
         else:
             model_path = general_utilies.files_dir + 'saved_models_linear_disjoint/ensemble/'
         model_path = model_path + args.model_type + '_' + data_type + '_' + args.NN_type + '/'
-    if (model_path[-1] == "\\"):  # TODO change before committing
+    if (model_path[-1] == "/"):  # TODO change before committing
         model_path = glob.glob(
             model_path + "*")  # list of all fiels in the directory
 
