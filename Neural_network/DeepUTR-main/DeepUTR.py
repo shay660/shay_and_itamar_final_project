@@ -1,5 +1,6 @@
 import argparse
 import glob
+import os.path
 import sys
 
 from deg_project.general import general_utilies
@@ -94,6 +95,7 @@ def train(args, data_type):
 
 
 def evaluate(args, data_type):
+    args.input_split_indices = 'false'
     if args.input_split_indices != 'false':
         split = True
         index_for_split = None if args.input_split_indices == 'random' else args.input_split_indices  # Random split if args.input_split_indices=='random'
@@ -133,6 +135,7 @@ def evaluate(args, data_type):
 
 
 def predict(args, data_type):
+    # TODO change the labels_path_minus to initial_A_minus and initial_A_plus.
     if (args.conventional_model == 'false'):
         model_id = dynamics_model_id_decoder(args)
         model_path = dynamics_model_path_decoder(args, data_type)
@@ -181,7 +184,7 @@ def dynamics_model_path_decoder(args, data_type):
         else:
             model_path = general_utilies.files_dir + 'saved_models_linear_disjoint/ensemble/'
         model_path = model_path + args.model_type + '_' + data_type + '_' + args.NN_type + '/'
-    if (model_path[-1] == '/'):
+    if (model_path[-1] == "\\"):  # TODO change before committing
         model_path = glob.glob(
             model_path + "*")  # list of all fiels in the directory
 
