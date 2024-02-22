@@ -243,8 +243,9 @@ def main():
         print("performing prediction")
         predict(args, data_type)
     elif args.generate_TF_modisco == 1:
+        model_path = dynamics_model_path_decoder(args, data_type)
         modisco_dataset = generate_modisco_dataset(
-            model_path=args.input_model_path_1,
+            model_path=model_path,
             seq_path=args.input_sequences,
             labels_path_plus=args.input_A_plus_labels,
             labels_path_minus=args.input_A_minus_labels,
