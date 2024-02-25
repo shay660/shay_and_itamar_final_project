@@ -253,7 +253,7 @@ def main():
             model_type=args.model_type,
             data_type=data_type,
             target_range=None,
-            test_validation_train_or_all_set='test')
+            test_validation_train_or_all_set='all')
         run_modisco(modisco_dataset[0], modisco_dataset[1], modisco_dataset[2],
                     modisco_dataset[3])
     else:
