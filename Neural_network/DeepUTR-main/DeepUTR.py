@@ -2,6 +2,7 @@ import argparse
 import glob
 import os.path
 import sys
+import time
 
 from deg_project.general import general_utilies
 from deg_project.NN import NN_train_test_models_utilies
@@ -173,7 +174,7 @@ def dynamics_model_id_decoder(args):
     else:
         raise ValueError('invalid model_type')
 
-    return model_id
+    return model_id + str(time.time())
 
 
 def dynamics_model_path_decoder(args, data_type):
