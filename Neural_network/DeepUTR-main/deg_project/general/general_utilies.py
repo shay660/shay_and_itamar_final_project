@@ -32,6 +32,8 @@ features_1_8_kmers_PATH = files_dir+"dataset/RF_features_1-8kmers.sav"
 RESA_data_PATH = files_dir+"dataset/RESA_WindowSequences.csv"
 
 split_to_train_validation_test_disjoint_sets_ids_PATH = files_dir+'dataset/split_to_train_validation_test_disjoint_sets_ids.csv'
+_5UTR_split_to_train_validation_test_disjoint_sets_ids_PATH = files_dir+'5utr_dataset/splitted_data/split_indicessplit_to_train_validation_test_disjoint_sets_ids.csv'
+
 
 
 #######################evalute pearson and MSE all 8 points models###############################################
@@ -91,50 +93,50 @@ def evalute_pearson_and_RMSE_all_8_points_models(saved_models_path_list, model_t
 
 
 #################### Windows versiom #######################
-# import msvcrt
-# import time
-#
-# def acquireLock():
-#     ''' acquire exclusive lock file access on Windows '''
-#     lockfile_path = 'lockfile.LOCK'
-#     locked_file_descriptor = None
-#
-#     while True:
-#         try:
-#             # Open the lock file for writing (creating if not exists)
-#             locked_file_descriptor = open(lockfile_path, 'w')
-#
-#             # Try to lock the file
-#             msvcrt.locking(locked_file_descriptor.fileno(), msvcrt.LK_NBLCK, 1)
-#
-#             # Successfully acquired the lock, break from the loop
-#             break
-#         except PermissionError:
-#             # If the file is locked, wait and retry
-#             time.sleep(0.1)
-#             continue
-#
-#     return locked_file_descriptor
-#
-# def releaseLock(locked_file_descriptor):
-#     ''' release exclusive lock file access on Windows '''
-#     if locked_file_descriptor:
-#         # Unlock and close the file
-#         msvcrt.locking(locked_file_descriptor.fileno(), msvcrt.LK_UNLCK, 1)
-#         locked_file_descriptor.close()
+import msvcrt
+import time
+
+def acquireLock():
+    ''' acquire exclusive lock file access on Windows '''
+    lockfile_path = 'lockfile.LOCK'
+    locked_file_descriptor = None
+
+    while True:
+        try:
+            # Open the lock file for writing (creating if not exists)
+            locked_file_descriptor = open(lockfile_path, 'w')
+
+            # Try to lock the file
+            msvcrt.locking(locked_file_descriptor.fileno(), msvcrt.LK_NBLCK, 1)
+
+            # Successfully acquired the lock, break from the loop
+            break
+        except PermissionError:
+            # If the file is locked, wait and retry
+            time.sleep(0.1)
+            continue
+
+    return locked_file_descriptor
+
+def releaseLock(locked_file_descriptor):
+    ''' release exclusive lock file access on Windows '''
+    if locked_file_descriptor:
+        # Unlock and close the file
+        msvcrt.locking(locked_file_descriptor.fileno(), msvcrt.LK_UNLCK, 1)
+        locked_file_descriptor.close()
 
 
 #################### Unix versiom #######################
 ###############################lock using lock file######################################
-import fcntl
+# import fcntl
 
-def acquireLock():
-    ''' acquire exclusive lock file access '''
-    locked_file_descriptor = open('lockfile.LOCK', 'w+')
-    fcntl.lockf(locked_file_descriptor, fcntl.LOCK_EX)
-    return locked_file_descriptor
-
-def releaseLock(locked_file_descriptor):
-    ''' release exclusive lock file access '''
-    locked_file_descriptor.close()
+# def acquireLock():
+#     ''' acquire exclusive lock file access '''
+#     locked_file_descriptor = open('lockfile.LOCK', 'w+')
+#     fcntl.lockf(locked_file_descriptor, fcntl.LOCK_EX)
+#     return locked_file_descriptor
+#
+# def releaseLock(locked_file_descriptor):
+#     ''' release exclusive lock file access '''
+#     locked_file_descriptor.close()
 
