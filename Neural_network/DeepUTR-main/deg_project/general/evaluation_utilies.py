@@ -148,7 +148,7 @@ def compute_LR_slopes (values_array):
         t = np.matrix([2, 3, 4, 5, 6, 7, 8, 10]).T
     slops = np.zeros((num_of_samples,))
     for i in range(num_of_samples):
-        mdl = LinearRegression().fit(t,values_array[i,:])
+        mdl = LinearRegression().fit(np.asarray(t),values_array[i,:]) #TODO changed t to numpy array
         slops[i] = mdl.coef_[0] #beta-slope
 
     return slops

@@ -17,7 +17,6 @@ class Snippet(object):
     def __init__(self, fwd, rev, has_pos_axis):
         Snippet.counter += 1
         if (rev is not None):
-            print(f"********** {Snippet.counter} ********** \n")
             assert len(fwd)==len(rev),str(len(fwd))+" "+str(len(rev)) + \
                                       "snippet counter = " + str(Snippet.counter)
         self.fwd = fwd

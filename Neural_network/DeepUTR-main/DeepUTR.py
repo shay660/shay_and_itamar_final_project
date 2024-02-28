@@ -152,7 +152,7 @@ def predict(args, data_type):
             output_path=args.output_path
         )
     else:
-        print('We do not suporrt prediction option for the conventional models')
+        print('We do not support prediction option for the conventional models')
 
 
 def dynamics_model_id_decoder(args):
