@@ -174,7 +174,7 @@ def dynamics_model_id_decoder(args):
     else:
         raise ValueError('invalid model_type')
 
-    return model_id # + str(time.time())
+    return model_id
 
 
 def dynamics_model_path_decoder(args, data_type):

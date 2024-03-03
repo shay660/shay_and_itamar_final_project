@@ -102,7 +102,7 @@ def train_and_evalute(train_set_wrapper, validation_set_wrapper,
     model_params, layers_params = NN_model_types.create_model_spec(model_id,
                                                                    train_spec,
                                                                    layers_spec)
-    model_id_and_timestamp = model_params['model_id'] + '___' +\
+    model_id_and_timestamp = model_params['model_id'] + '___' + \
                              datetime.datetime.now().strftime("%Y%m%d-%H%M%S%f")
 
     model = NN_model.model_creation_and_fit(train_set_wrapper,
@@ -130,8 +130,8 @@ def train_and_evalute(train_set_wrapper, validation_set_wrapper,
         general_utilies.releaseLock(locked_file_descriptor)
     # save model if requested
     if (save_model_path is not None):
-        model.save(
-            save_model_path + model_type + '_' + data_type + '_' + model_id_and_timestamp + '.h5')
+        model.save(save_model_path + model_type + '_' +
+                   data_type + '_' + model_id_and_timestamp + '.h5')
 
     return model
 
