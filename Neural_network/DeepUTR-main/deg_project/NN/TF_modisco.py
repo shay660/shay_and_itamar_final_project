@@ -45,7 +45,7 @@ def savePattern(patten, filename, LEN=70):
                delimiter="\t", header="Pos\tA\tC\tG\tT", comments='')
 
 
-def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
+def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution, output_path):
     # import TF-MoDISco only here since it's distroying the tf 2 behavior
     from tfmodisco_master import modisco
     import tfmodisco_master.modisco.visualization
@@ -57,6 +57,7 @@ def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
     if (null_distribution is None):
         nulldist_args = {}
     else:
+
         null_distribution = [np.sum(null_distribution_element, axis=1) for
                              null_distribution_element in null_distribution]
         nulldist_perposimp = np.array(null_distribution)
@@ -81,15 +82,16 @@ def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
         **nulldist_args)
 
     # create Results folder if not exists
-    Path(modisco_path).mkdir(parents=True, exist_ok=True)
+    # Path(modisco_path).mkdir(parents=True, exist_ok=True)
+    Path(output_path).mkdir(parents=True, exist_ok=True) #TODO
 
     # save the Results
-    if (os.path.isfile(modisco_path + "results.hdf5")):
-        os.remove(modisco_path + "results.hdf5")
+    if (os.path.isfile(output_path + "results.hdf5")):
+        os.remove(output_path + "results.hdf5")
 
-    grp = h5py.File(modisco_path + "results.hdf5")
+    grp = h5py.File(output_path + "results.hdf5")
     tfmodisco_results.save_hdf5(grp)
-    hdf5_results = h5py.File(modisco_path + "results.hdf5", "r")
+    hdf5_results = h5py.File(output_path + "results.hdf5", "r")
 
     print("Metaclusters heatmap")
     activity_patterns = \
@@ -100,7 +102,7 @@ def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
                                   'metacluster_indices']),
                     key=lambda x: x[1])])]
     sns.heatmap(activity_patterns, center=0)
-    plt.savefig(modisco_path + "Metaclusters_heatmap.png")
+    plt.savefig(output_path + "Metaclusters_heatmap.png")
 
     metacluster_names = [
         x.decode("utf-8") for x in
@@ -131,32 +133,32 @@ def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution):
             print("Hypothetical scores:")
             viz_sequence.plot_weights(
                 pattern["task0_hypothetical_contribs"]["fwd"])
-            plt.savefig(modisco_path + 'modisco_out/' + 'Hypothetical' + str(
+            plt.savefig(output_path + 'Hypothetical' + str(
                 i) + '.png')
             print("Actual importance scores:")
             viz_sequence.plot_weights(pattern["task0_contrib_scores"]["fwd"])
             plt.savefig(
-                modisco_path + 'modisco_out/' + 'importance' + str(i) + '.png')
+                output_path + 'importance' + str(i) + '.png')
             print("onehot, fwd and rev:")
             viz_sequence.plot_weights(
                 viz_sequence.ic_scale(np.array(pattern["sequence"]["fwd"]),
                                       background=background))
             plt.show()
             plt.savefig(
-                modisco_path + 'modisco_out/' + 'onehot_fwd' + str(i) + '.png')
+                output_path + 'onehot_fwd' + str(i) + '.png')
             viz_sequence.plot_weights(
                 viz_sequence.ic_scale(np.array(pattern["sequence"]["rev"]),
                                       background=background))
             plt.savefig(
-                modisco_path + 'modisco_out/' + 'onehot_rev' + str(i) + '.png')
+                output_path + 'onehot_rev' + str(i) + '.png')
             savePattern(np.array(pattern["task0_hypothetical_contribs"]["fwd"]),
-                        modisco_path + "modisco_out/hyp_pattern" + str(
+                        output_path + "hyp_pattern" + str(
                             i) + ".txt")
             savePattern(np.array(pattern["task0_contrib_scores"]["fwd"]),
-                        modisco_path + "modisco_out/imp_pattern" + str(
+                        output_path + "imp_pattern" + str(
                             i) + ".txt")
             savePattern(np.array(pattern["sequence"]["fwd"]),
-                        modisco_path + "modisco_out/onehot_pattern" + str(
+                        output_path + "onehot_pattern" + str(
                             i) + ".txt")
 
     hdf5_results.close()

@@ -254,9 +254,10 @@ def main():
             model_type=args.model_type,
             data_type=data_type,
             target_range=None,
-            test_validation_train_or_all_set='all')
+            test_validation_train_or_all_set='all',
+            )
         run_modisco(modisco_dataset[0], modisco_dataset[1], modisco_dataset[2],
-                    modisco_dataset[3])
+                    modisco_dataset[3], args.output_path) #TODO
     else:
         raise ValueError(
             'None of the arguments train, evaluate, and predict got Valid input')
