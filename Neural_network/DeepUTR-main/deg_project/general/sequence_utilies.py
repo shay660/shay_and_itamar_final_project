@@ -57,6 +57,7 @@ def create_DNA_logo (PWM_df, secondary_color=False, figsize=(10, 2.5), labelpad=
     else:
         color_scheme='classic'
 
+    print(f'******************************* DF shape *****************************************\n {PWM_df.shape()}\n **********************************************************************')
     IG_logo = logomaker.Logo(PWM_df,
                             shade_below=.5,
                             fade_below=.5,
@@ -64,7 +65,6 @@ def create_DNA_logo (PWM_df, secondary_color=False, figsize=(10, 2.5), labelpad=
                             font_name='Arial Rounded MT Bold',
                             ax=ax,
                             figsize=figsize)
-
     IG_logo.style_spines(visible=False)
     IG_logo.style_spines(spines=['left', 'bottom'], visible=True)
     IG_logo.style_xticks(rotation=90, fmt='%d', anchor=0)
