@@ -6,7 +6,7 @@ from deg_project.general import evaluation_utilies
 import tensorflow as tf
 
 
-def load_dataset (seq_path, labels_path_minus, labels_path_plus, data_type):
+def load_dataset(seq_path, labels_path_minus, labels_path_plus, data_type):
     seq = pd.read_csv(seq_path)["seq"].values.tolist()
     features_list = [sequence_utilies.one_hot_encoding(x) for x in seq]
     features = np.asarray(features_list, dtype="uint8")
@@ -40,16 +40,16 @@ def load_dataset_model_8_points (seq_path, labels_path_minus, labels_path_plus, 
         #initial return_value with dataset without splitting
         return_value = (initial_values_features, features, labels)
         if(split == True):
-            return_value = split_features_and_labels_for_8_points (features, initial_values_features, labels, index_for_split)
+            return_value = split_features_and_labels_for_8_points(features, initial_values_features, labels, index_for_split)
     else:
         return_value = (initial_values_features, features)
        
     return return_value
 
 def split_mRNA_levels_to_initial_and_labels(labels_df, only_predict=False):
-    initial_values_features =  labels_df.iloc[:, 1].values
+    initial_values_features = labels_df.iloc[:, 1].values
     initial_values_features = initial_values_features.reshape(initial_values_features.shape[0],1)
-    labels =  labels_df.iloc[:, 2:].values if only_predict==False else None
+    labels = labels_df.iloc[:, 2:].values if only_predict==False else None
 
     return initial_values_features, labels
 
@@ -83,7 +83,7 @@ def load_dataset_linear_model (seq_path, labels_path_minus, labels_path_plus, da
             labels = np.concatenate((np.expand_dims(labels_minus, axis=1), np.expand_dims(labels_plus, axis=1)), axis=1)
         elif (data_type == '-' or data_type == '+'):
             labels_df = labels_minus_df if data_type == '-' else labels_plus_df
-            labels =  evaluation_utilies.compute_LR_slopes(labels_df.iloc[:, 1:].values) 
+            labels = evaluation_utilies.compute_LR_slopes(labels_df.iloc[:, 1:].values)
         else:
             raise ValueError('invalid data type')
         
@@ -115,8 +115,8 @@ def split_features_and_labels_for_linear (features, labels, index_for_split):
 def load_dataset_model_type (seq_path, labels_path_minus, labels_path_plus, model_type, data_type, only_predict=False, split=True, index_for_split=None):
 
     if (model_type == 'dynamics'):
-        return load_dataset_model_8_points (seq_path, labels_path_minus, labels_path_plus, data_type, only_predict, split, index_for_split)
+        return load_dataset_model_8_points(seq_path, labels_path_minus, labels_path_plus, data_type, only_predict, split, index_for_split)
     elif (model_type == 'rate'):
-        return load_dataset_linear_model (seq_path, labels_path_minus, labels_path_plus, data_type, only_predict, split, index_for_split)
+        return load_dataset_linear_model(seq_path, labels_path_minus, labels_path_plus, data_type, only_predict, split, index_for_split)
     else:
         raise ValueError('invalid model type')
