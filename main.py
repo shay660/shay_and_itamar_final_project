@@ -26,17 +26,17 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
     :return: tuple of samples and the corresponding responses as pandas
     DataFrame.
     """
-    f = pd.read_csv(path_to_samples, delimiter='\t', index_col=0, skiprows=2,
+    f = pd.read_csv(path_to_samples, index_col=0, skiprows=1,
                     names=['id', 'seq'])
     responses = load_responses(model_to_run, path_to_response)
     return f, responses
 
 
 def load_responses(model_to_run, path_to_response):
-    responses: pd.DataFrame = pd.read_csv(path_to_response, delimiter='\t',
-                                          index_col=0, skiprows=1,
-                                          names=['id', 'degradation rate',
-                                                 'step_loc', 't0'])
+    responses: pd.DataFrame = pd.read_csv(path_to_response,
+                                          index_col=0, usecols=['id', 'dg',
+                                                                'x0', 't0'])
+    responses.columns = ['degradation rate', 'step_loc', 't0']
     if model_to_run == 3 or model_to_run == 4:  # early onset.
         print("************ \nFilters early on-set responses", flush=True)
         responses = responses[responses['t0'] == 1]

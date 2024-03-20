@@ -66,7 +66,7 @@ def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution, output
     # Run TF-MoDISco
     tfmodisco_results = tfmodisco_workflow.workflow.TfModiscoWorkflow(
         # Slight modifications from the default settings
-        target_seqlet_fdr=0.25, #TODO change value back to 0.25
+        target_seqlet_fdr=0.1, #TODO change value back to 0.25
         seqlets_to_patterns_factory=
         modisco.tfmodisco_workflow.seqlets_to_patterns.TfModiscoSeqletsToPatternsFactory(
             kmer_len=6, num_gaps=1,
