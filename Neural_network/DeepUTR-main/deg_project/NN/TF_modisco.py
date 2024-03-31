@@ -44,7 +44,6 @@ def savePattern(patten, filename, LEN=70):
     np.savetxt(filename, df.values, fmt='%i\t%0.6f\t%0.6f\t%0.6f\t%0.6f',
                delimiter="\t", header="Pos\tA\tC\tG\tT", comments='')
 
-
 def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution, output_path):
     # import TF-MoDISco only here since it's distroying the tf 2 behavior
     from tfmodisco_master import modisco
@@ -66,7 +65,7 @@ def run_modisco(hyp_impscores, impscores, onehot_data, null_distribution, output
     # Run TF-MoDISco
     tfmodisco_results = tfmodisco_workflow.workflow.TfModiscoWorkflow(
         # Slight modifications from the default settings
-        target_seqlet_fdr=0.1, #TODO change value back to 0.25
+        target_seqlet_fdr=0.05, #TODO change value back to 0.25
         seqlets_to_patterns_factory=
         modisco.tfmodisco_workflow.seqlets_to_patterns.TfModiscoSeqletsToPatternsFactory(
             kmer_len=6, num_gaps=1,
