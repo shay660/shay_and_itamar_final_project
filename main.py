@@ -26,15 +26,17 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
     :return: tuple of samples and the corresponding responses as pandas
     DataFrame.
     """
-    f = pd.read_csv(path_to_samples, index_col=0, skiprows=1,
+    f = pd.read_csv(path_to_samples, index_col=0, skiprows=2, delimiter='\t',
                     names=['id', 'seq'])
     responses = load_responses(model_to_run, path_to_response)
     return f, responses
 
 
 def load_responses(model_to_run, path_to_response):
-    responses: pd.DataFrame = pd.read_csv(path_to_response,
-                                          index_col=0, usecols=['id', 'dg',
+    file_type: str = path_to_response.split('.')[-1]
+    delimiter: str = ',' if file_type == 'csv' else '\t'
+    responses: pd.DataFrame = pd.read_csv(path_to_response, delimiter=delimiter,
+                                          index_col=0, names=['id', 'dg',
                                                                 'x0', 't0'])
     responses.columns = ['degradation rate', 'step_loc', 't0']
     if model_to_run == 3 or model_to_run == 4:  # early onset.
@@ -165,7 +167,7 @@ def argument_parser():
     parser.add_argument('--max_length_kmer', type=int, default=None,
                         help="The length of the max kmer to look for.")
     parser.add_argument('--to_generate_matrix', type=bool, default=False,
-                        help="If True generate a new matrix", )
+                        help="If True generate a new matrix")
     return parser.parse_args()
 
 
@@ -221,7 +223,7 @@ def main():
 
     predict_and_calculate_loss(model, X_train, y_train, args.name_of_model,
                                file)
-    find_significant_kmers(model, X_train)
+    find_significant_kmers(model)
 
     dump(model, f"{args.name_of_model}_model.joblib")
 
