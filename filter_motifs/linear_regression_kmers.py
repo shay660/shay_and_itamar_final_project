@@ -8,7 +8,6 @@ from main import find_significant_kmers
 
 def significant_kmers_from_model() -> None:
     model_path = glob.glob("*.joblib")[0]
-    print(model_path)
     model = joblib.load(model_path)
     find_significant_kmers(model)
 
