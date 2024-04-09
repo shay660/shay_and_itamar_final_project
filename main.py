@@ -100,7 +100,7 @@ def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
         "Predicted_Degradation_Rate"], r, _name_of_model)
 
 
-def make_heatmap_plot(X, y, r, _name_of_model):
+def make_heatmap_plot(X, y, r, _name_of_model: str):
     heatmap, xedges, yedges = np.histogram2d(X, y, bins=50)
 
     # Flatten the heatmap to use as colors for the points
@@ -156,9 +156,10 @@ def argument_parser():
                                                               arg.split(','))),
                         help="alphas for the lass, separated by commas")
     parser.add_argument('--name_of_matrix', type=str,
+                        default=argparse.SUPPRESS,
                         help="A name by which you will read the Kmer matrix "
                              "or open an existing one")
-    parser.add_argument('--name_of_model', type=str,
+    parser.add_argument('--name_of_model', type=str, default=argparse.SUPPRESS,
                         help="Name of the new model")
     parser.add_argument('--path_to_samples', type=str, default=None,
                         help="Path to samples (sequences) file.")
