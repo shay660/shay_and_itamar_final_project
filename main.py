@@ -26,7 +26,7 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
     :return: tuple of samples and the corresponding responses as pandas
     DataFrame.
     """
-    file_type: str = path_to_response.split('.')[-1]
+    file_type: str = path_to_samples.split('.')[-1]
     delimiter: str = ',' if file_type == 'csv' else '\t'
     f = pd.read_csv(path_to_samples, index_col=0, skiprows=2, delimiter=delimiter,
                     names=['id', 'seq'])
@@ -226,10 +226,8 @@ def main():
 
     predict_and_calculate_loss(model, X_train, y_train, args.name_of_model,
                                file)
-    find_significant_kmers(model)
-
     dump(model, f"{args.name_of_model}_model.joblib")
-
+    find_significant_kmers(model)
     file.close()
     end = time()
     print(f"************ \ntime = {end - start}", flush=True)
