@@ -11,13 +11,13 @@ pd.DataFrame, pd.Series]:
     """
     fit a linear regression model with samples
     """
-    X_train, y_train, X_test, y_test = _split_to_train_and_test(samples, file)
-    # X_train, y_train = samples.iloc[:, :-3], samples.iloc[:, -3:]
+    # X_train, y_train, X_test, y_test = _split_to_train_and_test(samples, file)
+    X_train, y_train = samples.iloc[:, :-3], samples.iloc[:, -3:]
     # file.write(f"Number of samples in the train set: {X_train.shape[0]}\n")
     linear_reg_model = LinearRegression().fit(X_train, y_train)
     print(f"**** Linear Regression Fitted ****", flush=True)
-
-    return linear_reg_model, X_test, y_test
+    return linear_reg_model, X_train, y_train
+    # return linear_reg_model, X_test, y_test
 
 
 def _split_to_train_and_test(samples: pd.DataFrame, file):

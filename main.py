@@ -39,7 +39,7 @@ def load_responses(model_to_run, path_to_response):
     delimiter: str = ',' if file_type == 'csv' else '\t'
     responses: pd.DataFrame = pd.read_csv(path_to_response, delimiter=delimiter,
                                           index_col=0, usecols=['id', 'dg',
-                                                                'x0', 't0'])
+                                                                    'x0', 't0'])
     responses.columns = ['degradation rate', 'step_loc', 't0']
     if model_to_run == 3 or model_to_run == 4:  # early onset.
         print("************ \nFilters early on-set responses", flush=True)
@@ -86,14 +86,20 @@ def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
     mse = mean_squared_error(y_test['degradation rate'], prediction[:, 0])
     r = np.round(
         np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0, 1], 3)
-
+    r_squared = np.round(r2_score(y_test, prediction), 3)
     file.write(f"MSE of the Linear regression = {round(mse, 3)}\n")
     file.write(f"r of the Linear regression = {r}\n")
+    file.write(f"r^2 of the Linear regression = {r_squared}\n")
 
     print("******** Save the results ********", flush=True)
     prediction_df = pd.DataFrame(
-        {'True_Degradation_Rate': y_test['degradation rate'],
-         'Predicted_Degradation_Rate': prediction[:, 0]})
+        {'Id': y_test.index,
+        'True_Degradation_Rate': y_test['degradation rate'],
+         'True_x0': y_test['step_loc'],
+         'True_t0': y_test['t0'],
+         'Predicted_Degradation_Rate': prediction[:, 0],
+         'Predicted_x0': prediction[:, 1],
+         'Predicted_t0': prediction[:, 2]})
     prediction_df.to_csv(f"{_name_of_model}_results.csv",
                          index=False)
     make_heatmap_plot(prediction_df["True_Degradation_Rate"], prediction_df[
