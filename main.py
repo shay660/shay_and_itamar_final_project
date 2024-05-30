@@ -189,15 +189,14 @@ def find_significant_kmers(model: LinearRegression) -> None:
     - A CSV file named "most_significant_kmers" containing the most significant
      features.
     """
-    coefficients = model.coef_
-    weights_norms = np.linalg.norm(coefficients, axis=0)
+    weights = model.coef_[0, :]
     columns_names = model.feature_names_in_
 
     coefficients_df = pd.DataFrame(
-        {'kmers': columns_names, 'weights_norms': weights_norms})
+        {'kmers': columns_names, 'weights': weights})
 
     sorted_coefficients_df = coefficients_df.sort_values(
-        by='weights_norms', ascending=False)
+        by='weights', ascending=False)
 
     # Extract the most significant features (columns)
     sorted_coefficients_df.to_csv("most_significant_kmers.csv")
