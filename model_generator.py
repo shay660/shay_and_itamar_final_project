@@ -1,5 +1,6 @@
 from typing import Dict, List, Tuple
 
+import joblib
 import pandas as pd
 from sklearn.linear_model import Lasso, LinearRegression
 from sklearn.model_selection import train_test_split
@@ -16,6 +17,7 @@ pd.DataFrame, pd.Series]:
     # file.write(f"Number of samples in the train set: {X_train.shape[0]}\n")
     linear_reg_model = LinearRegression().fit(X_train, y_train)
     print(f"**** Linear Regression Fitted ****", flush=True)
+    joblib.dump(linear_reg_model, file)
     return linear_reg_model, X_train, y_train
     # return linear_reg_model, X_test, y_test
 
