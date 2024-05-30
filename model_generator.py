@@ -1,3 +1,4 @@
+import sys
 from typing import Dict, List, Tuple
 
 import joblib
@@ -7,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 
 
-def linear_reg_model_generator(samples: pd.DataFrame, file) -> Tuple[object,
+def linear_reg_model_generator(samples: pd.DataFrame) -> Tuple[object,
 pd.DataFrame, pd.Series]:
     """
     fit a linear regression model with samples
@@ -17,7 +18,6 @@ pd.DataFrame, pd.Series]:
     # file.write(f"Number of samples in the train set: {X_train.shape[0]}\n")
     linear_reg_model = LinearRegression().fit(X_train, y_train)
     print(f"**** Linear Regression Fitted ****", flush=True)
-    joblib.dump(linear_reg_model, file)
     return linear_reg_model, X_train, y_train
     # return linear_reg_model, X_test, y_test
 
@@ -82,3 +82,4 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
     print(f"**** Linear Regression Fitted ****", flush=True)
 
     return linear_reg_model, X_train, y_train  # X_test, y_test
+
