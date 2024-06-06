@@ -226,8 +226,9 @@ def main():
     file.write(f"Run at {timestamp}\n")
     file.write(f"Given alphas: {args.alphas}\n")
     print("************  \nRun The model", flush=True)
-    model, X_train, y_train = lasso_and_cross_validation_generator(
-        samples_to_run, args.alphas, file)
+    model, X_train, y_train = linear_reg_model_generator(samples_to_run)
+    # model, X_train, y_train = lasso_and_cross_validation_generator(
+    #     samples_to_run, args.alphas, file)
 
     predict_and_calculate_loss(model, X_train, y_train, args.name_of_model,
                                file)
