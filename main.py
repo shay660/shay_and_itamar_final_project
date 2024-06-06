@@ -28,7 +28,8 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
     """
     file_type: str = path_to_samples.split('.')[-1]
     delimiter: str = ',' if file_type == 'csv' else '\t'
-    f = pd.read_csv(path_to_samples, index_col=0, skiprows=2, delimiter=delimiter,
+    f = pd.read_csv(path_to_samples, index_col=0, skiprows=2,
+                    delimiter=delimiter,
                     names=['id', 'seq'])
     responses = load_responses(model_to_run, path_to_response)
     return f, responses
@@ -39,7 +40,7 @@ def load_responses(model_to_run, path_to_response):
     delimiter: str = ',' if file_type == 'csv' else '\t'
     responses: pd.DataFrame = pd.read_csv(path_to_response, delimiter=delimiter,
                                           index_col=0, usecols=['id', 'dg',
-                                                                    'x0', 't0'])
+                                                                'x0', 't0'])
     responses.columns = ['degradation rate', 'step_loc', 't0']
     if model_to_run == 3 or model_to_run == 4:  # early onset.
         print("************ \nFilters early on-set responses", flush=True)
@@ -86,7 +87,8 @@ def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
     mse = mean_squared_error(y_test['degradation rate'], prediction[:, 0])
     r = np.round(
         np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0, 1], 3)
-    r_squared = np.round(r2_score(y_test, prediction), 3)
+    r_squared = np.round(r2_score(y_test['degradation rate'], prediction[:, 0]),
+                         3)
     file.write(f"MSE of the Linear regression = {round(mse, 3)}\n")
     file.write(f"r of the Linear regression = {r}\n")
     file.write(f"r^2 of the Linear regression = {r_squared}\n")
@@ -94,7 +96,7 @@ def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
     print("******** Save the results ********", flush=True)
     prediction_df = pd.DataFrame(
         {'Id': y_test.index,
-        'True_Degradation_Rate': y_test['degradation rate'],
+         'True_Degradation_Rate': y_test['degradation rate'],
          'True_x0': y_test['step_loc'],
          'True_t0': y_test['t0'],
          'Predicted_Degradation_Rate': prediction[:, 0],
@@ -194,7 +196,6 @@ def find_significant_kmers(model: LinearRegression) -> None:
 
     coefficients_df = pd.DataFrame(
         {'kmers': columns_names, 'weights': weights})
-
     sorted_coefficients_df = coefficients_df.sort_values(
         by='weights', ascending=False)
 
