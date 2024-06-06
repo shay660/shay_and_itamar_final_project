@@ -36,19 +36,19 @@ lasso_weights_df.drop(columns=["Unnamed: 0"], inplace=True)
 
 # Define a function to plot sequence weights
 def plot_sequence_weights(seq_weights, seq_arr, title, filepath, max_val):
-    plt.figure(figsize=(20, 6))
+    plt.figure(figsize=(8, 4))
     sns.set(style="whitegrid")
     sns.lineplot(x=seq_weights.keys(), y=seq_weights.values(), marker='o',
-                 color='b', linewidth=2.5, markersize=8)
+                 color='b', linewidth=2.5, markersize=6)
 
-    plt.xticks(range(0, len(seq_arr)), seq_arr, fontsize=10)
-    plt.yticks(fontsize=12)
-    plt.title(title, fontsize=18, fontweight='bold')
-    plt.xlabel('Position', fontsize=14)
-    plt.ylabel('Signal strength estimation', fontsize=14)
+    plt.xticks(range(0, len(seq_arr)), seq_arr, fontsize=6)
+    plt.yticks(fontsize=6)
+    plt.title(title, fontsize=8, fontweight='bold')
+    plt.xlabel('Position', fontsize=6)
+    plt.ylabel('Signal strength estimation', fontsize=6)
     plt.ylim(-max_val * 1.1, max_val * 1.1)
     plt.tight_layout()
-    plt.savefig(filepath, dpi=300)
+    plt.savefig(filepath, dpi=150)
     plt.close()
 
 
