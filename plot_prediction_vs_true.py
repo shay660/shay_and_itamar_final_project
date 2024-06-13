@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
-from linear_regression.plot_weights import plot_weights
+# from linear_regression.plot_weights import plot_weights
 
 relevant_ids = [
     "S1_L_T23640",
