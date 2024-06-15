@@ -9,7 +9,8 @@ import tensorflow as tf
 def load_dataset(seq_path, labels_path_minus, labels_path_plus, data_type):
     seq = pd.read_csv(seq_path)["seq"].values.tolist()
     features_list = [sequence_utilies.one_hot_encoding(x) for x in seq]
-    features = np.asarray(features_list, dtype="uint8")
+    # features = np.asarray(features_list, dtype="uint8")
+    features = np.asarray(features_list)
 
     labels_minus_df = None
     labels_plus_df = None
