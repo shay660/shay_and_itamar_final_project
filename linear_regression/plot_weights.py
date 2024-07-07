@@ -34,7 +34,7 @@ lasso_weights_df.set_index("kmers", inplace=True)
 lasso_weights_df.drop(columns=["Unnamed: 0"], inplace=True)
 
 
-# Define a function to plot sequence weights
+# Define a function to plot sequence_tensor weights
 def plot_sequence_weights(seq_weights, seq_arr, title, filepath, max_val):
     plt.figure(figsize=(8, 4))
     sns.set(style="whitegrid")

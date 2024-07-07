@@ -30,7 +30,7 @@ class PositionalEncoding(nn.Module):
 class TransformerRegressor(nn.Module):
     """
     Transformer-based Regressor model for predicting mRNA degradation rate
-    according to it sequence.
+    according to it sequence_tensor.
 
     Args:
         seq_len (int): The length of the input sequences.

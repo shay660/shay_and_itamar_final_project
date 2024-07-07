@@ -12,7 +12,7 @@ def count_kmers_according_to_lasso(df: pd.DataFrame, kmers: np.array) ->pd.DataF
     # Initialize a new DataFrame with the same index as the original DataFrame
     kmer_counts_df = pd.DataFrame(index=df.index)
 
-    # Iterate over each k-mer and count its occurrences in each sequence
+    # Iterate over each k-mer and count its occurrences in each sequence_tensor
     for kmer in kmers:
         kmer_counts_df[kmer] = df['seq'].apply(lambda seq: seq.count(kmer))
     return kmer_counts_df

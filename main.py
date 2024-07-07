@@ -149,7 +149,7 @@ def argument_parser():
     """
     parser = argparse.ArgumentParser(description="The script design to predict "
                                                  "degradation rate of mRNA in the cell "
-                                                 "according to it's sequence "
+                                                 "according to it's sequence_tensor "
                                                  "using linear regression model.")
 
     parser.add_argument('--model_to_run', type=int,

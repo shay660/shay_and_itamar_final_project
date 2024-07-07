@@ -5,12 +5,12 @@ def matrix_generator(f : pd.DataFrame, response_vec, min_length: int,
                      max_length: int) -> pd.DataFrame:
     """
     generate a matrix from a list of sequences that count how many times each
-    gene of the length min_length to max_length is in each sequence.
+    gene of the length min_length to max_length is in each sequence_tensor.
     :param seq: list of sequences
     :param max_length:the min length of k_mer to look for.
     :param min_length:the max length of k_mer to look for.
     :param response_vec:
-    :return: data frame that count how many times each sequence in the length of
+    :return: data frame that count how many times each sequence_tensor in the length of
      3-7 nucleotides is in each 3'URR. The shape (n_genes, 4^3+4^4+4^5+4^6+4^7)
     """
 
@@ -29,7 +29,7 @@ def matrix_generator(f : pd.DataFrame, response_vec, min_length: int,
 def k_mers_count(seq: str, min_length: int, max_length: int) -> Dict[str, int]:
     """
     counts the number of times each k_mers in the length of min_length to
-    max_length in a sequence.
+    max_length in a sequence_tensor.
     :param min_length: the min length of k_mer that is look for.
     :param max_length: the max length of k_kmer that is look for.
     :return: A dict which the key is the k_mer and the value is the number of
