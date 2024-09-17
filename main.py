@@ -8,10 +8,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import GridSearchCV
 
 from load_data import matrix_generator
 from model_generator import linear_reg_model_generator, \
-    lasso_and_cross_validation_generator
+    lasso_and_cross_validation_generator, linear_model_generator
 from sklearn.metrics import mean_squared_error, r2_score
 from joblib import dump, load
 
@@ -38,9 +39,15 @@ def load_files(model_to_run: int, path_to_samples: str, path_to_response) -> \
 def load_responses(model_to_run, path_to_response):
     file_type: str = path_to_response.split('.')[-1]
     delimiter: str = ',' if file_type == 'csv' else '\t'
-    responses: pd.DataFrame = pd.read_csv(path_to_response, delimiter=delimiter,
-                                          index_col=0, usecols=['id', 'dg',
-                                                                'x0', 't0'])
+    try:
+        responses: pd.DataFrame = pd.read_csv(path_to_response,
+                                              delimiter=delimiter,
+                                              index_col=0, usecols=['id', 'dg',
+                                                                    'x0', 't0'])
+    except ValueError:
+        responses: pd.DataFrame = pd.read_csv(path_to_response,
+                                              delimiter=delimiter,
+                                              index_col=0)
     responses.columns = ['degradation rate', 'step_loc', 't0']
     if model_to_run == 3 or model_to_run == 4:  # early onset.
         print("************ \nFilters early on-set responses", flush=True)
@@ -84,14 +91,13 @@ def save_or_upload_matrix(to_generate_matrix: bool, model: int,
 def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
                                file) -> None:
     prediction = _model.predict(X_test)
-    mse = mean_squared_error(y_test['degradation rate'], prediction[:, 0])
-    r = np.round(
-        np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0, 1], 3)
-    r_squared = np.round(r2_score(y_test['degradation rate'], prediction[:, 0]),
-                         3)
-    file.write(f"MSE of the Linear regression = {round(mse, 3)}\n")
-    file.write(f"r of the Linear regression = {r}\n")
-    file.write(f"r^2 of the Linear regression = {r_squared}\n")
+    # mse = mean_squared_error(y_test['degradation rate'], prediction[:, 0])
+    # r = np.round(
+    #     np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0, 1], 3)
+    # r_squared = np.round(r2_score(y_test, prediction), 3)
+    # file.write(f"MSE of the Linear regression = {round(mse, 3)}\n")
+    # file.write(f"r of the Linear regression = {r}\n")
+    # file.write(f"r^2 of the Linear regression = {r_squared}\n")
 
     print("******** Save the results ********", flush=True)
     prediction_df = pd.DataFrame(
@@ -105,7 +111,7 @@ def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
     prediction_df.to_csv(f"{_name_of_model}_results.csv",
                          index=False)
     make_heatmap_plot(prediction_df["True_Degradation_Rate"], prediction_df[
-        "Predicted_Degradation_Rate"], r, _name_of_model)
+        "Predicted_Degradation_Rate"], _model.best_score_, _name_of_model)
 
 
 def make_heatmap_plot(X, y, r, _name_of_model: str):
@@ -126,19 +132,23 @@ def make_heatmap_plot(X, y, r, _name_of_model: str):
     plt.figure(figsize=(8, 6))
     plt.gca().set_facecolor('white')
 
+    min_val = min(X.min(), y.min()) * 0.75
+    max_val = max(X.max(), y.max()) * 1.25
     # Create a scatter plot with colors based on density
     plt.scatter(X, y, c=colors, cmap='viridis', alpha=0.5, edgecolor='none')
-    plt.plot([-5, 1], [-5, 1], color='grey', linestyle='--', label='y=x')
+    plt.plot([min_val, max_val], [min_val, max_val], color='grey',
+             linestyle='--', label='y=x')
 
     # Add the r value as text to the plot
-    plt.text(0.05, 0.95, f'r = {r:.2f}', transform=plt.gca().transAxes,
+    plt.text(0.05, 0.95, f'r^2 = {r:.2f}', transform=plt.gca().transAxes,
              fontsize=12,
              verticalalignment='top',
              bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
     plt.xlabel("Ture Degradation Rate")
     plt.ylabel("Predicted Degradation Rate")
     plt.title(f"{_name_of_model.replace('name', ' ')}")
-
+    plt.xlim((min_val, max_val))
+    plt.ylim((min_val, max_val))
     # Display or save the plot
     print("******* Save the plot *******")
     plt.savefig(f"{_name_of_model}_plot.png")
@@ -164,10 +174,10 @@ def argument_parser():
                                                               arg.split(','))),
                         help="alphas for the lass, separated by commas")
     parser.add_argument('--name_of_matrix', type=str,
-                        default=argparse.SUPPRESS,
+                        default=None,
                         help="A name by which you will read the Kmer matrix "
                              "or open an existing one")
-    parser.add_argument('--name_of_model', type=str, default=argparse.SUPPRESS,
+    parser.add_argument('--name_of_model', type=str, default=None,
                         help="Name of the new model")
     parser.add_argument('--path_to_samples', type=str, default=None,
                         help="Path to samples (sequences) file.")
@@ -182,7 +192,7 @@ def argument_parser():
     return parser.parse_args()
 
 
-def find_significant_kmers(model: LinearRegression) -> None:
+def find_significant_kmers(model: GridSearchCV) -> None:
     """
     Identify and save the most significant features (columns) based on a trained
     linear regression model.
@@ -191,8 +201,8 @@ def find_significant_kmers(model: LinearRegression) -> None:
     - A CSV file named "most_significant_kmers" containing the most significant
      features.
     """
-    weights = model.coef_[0, :]
-    columns_names = model.feature_names_in_
+    weights = model.best_estimator_.coef_[0, :]
+    columns_names = model.best_estimator_.feature_names_in_
 
     coefficients_df = pd.DataFrame(
         {'kmers': columns_names, 'weights': weights})
@@ -227,9 +237,10 @@ def main():
     file.write(f"Run at {timestamp}\n")
     file.write(f"Given alphas: {args.alphas}\n")
     print("************  \nRun The model", flush=True)
-    model, X_train, y_train = lasso_and_cross_validation_generator(
+    # model, X_train, y_train = lasso_and_cross_validation_generator(
+    #     samples_to_run, args.alphas, file)
+    model, X_train, y_train = linear_model_generator(
         samples_to_run, args.alphas, file)
-
     predict_and_calculate_loss(model, X_train, y_train, args.name_of_model,
                                file)
     dump(model, f"{args.name_of_model}_model.joblib")

@@ -1,9 +1,12 @@
 from typing import Dict, List, Tuple
 
 import pandas as pd
+from sklearn.base import BaseEstimator
 from sklearn.linear_model import Lasso, LinearRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.model_selection import GridSearchCV
+
+from LinearModel import RNALinearModel
 
 
 def linear_reg_model_generator(samples: pd.DataFrame, file) -> Tuple[object,
@@ -80,3 +83,29 @@ def lasso_and_cross_validation_generator(samples: pd.DataFrame, alphas: list,
     print(f"**** Linear Regression Fitted ****", flush=True)
 
     return linear_reg_model, X_train, y_train  # X_test, y_test
+
+
+def linear_model_generator(samples: pd.DataFrame, alphas: list,
+                                         file) \
+        -> Tuple[BaseEstimator, pd.DataFrame, pd.Series]:
+
+    X, y = samples.iloc[:, :-3], samples.iloc[:, -3:]
+    file.write(f"Number of samples in the train set: {X.shape[0]}\n")
+    linear_model = RNALinearModel(max_iter=2500, tol=3e-3)
+    # set all possible values for the regularization term
+    alphas: Dict[str, List[float]] = {'alpha': alphas}
+
+    # cross validation model
+    folds, n_jobs = 10, 4
+    file.write(f"Number of folds: {folds} (n_jobs = {n_jobs})\n")
+
+    grid_search = GridSearchCV(linear_model, alphas, cv=folds, n_jobs=n_jobs)
+
+    grid_search.fit(X, y)
+    print("**** FINISH GRID-SEARCH ****", flush=True)
+    best_alpha = grid_search.best_params_['alpha']
+    print(f"Best Alpha: {best_alpha}")
+    file.write(f"Best Alpha: {best_alpha}\n")
+    file.write(f"r^2: {grid_search.best_score_: .3f}\n")
+    return grid_search, X, y
+
