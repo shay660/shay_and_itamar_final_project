@@ -181,8 +181,8 @@ def compute_LR_slopes(values_array):
     # compute the slopes
     if (values_array.shape[1] == 9):
         t = np.matrix([1, 2, 3, 4, 5, 6, 7, 8, 10]).T
-    elif values_array.shape[1] == 7:
-        t = np.matrix([1, 3, 5, 6, 6.5, 7, 8]).T
+    elif values_array.shape[1] == 6:
+        t = np.matrix([1, 3, 5, 6, 7, 8]).T
     else:
         t = np.matrix([2, 3, 4, 5, 6, 7, 8, 10]).T
     slops = np.zeros((num_of_samples,))
