@@ -2,37 +2,45 @@ import torch
 import torch.nn as nn
 from scipy.stats import pearsonr
 from sklearn.metrics import mean_squared_error, r2_score
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 from tqdm import tqdm
 import numpy as np
-
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 class Trainer:
     """
     Trainer class to handle training and validation of a neural network model
     with early stopping.
-    Parameters:
-        :param model (nn.Module): The neural network model to be trained.
-        :param train_dataset (torch.utils.data.Dataset): The training dataset.
-        :param validation_dataset (torch.utils.data.Dataset): The validation dataset.
-        :param test_dataset (torch.utils.data.Dataset, optional): The test dataset.
-        :param criterion (nn.Module, optional): The loss function to be used.
-            Default is nn.MSELoss().
-        :param lr (float, optional): The learning rate for the optimizer.
-            Default is 1e-4.
-        :param num_epochs (int, optional): The number of epochs to train the model.
-            Default is 128.
-        :param patience (int, optional): The number of epochs to wait for
-            improvement before early stopping. Default is 10.
-        :param reg_factor l1 regularization factor the Adam (weight decay).
-            Default is 0.01
     """
 
     def __init__(self, model, train_dataset, validation_dataset,
-                 test_dataset=None, criterion=nn.MSELoss(), batch_size=64,
-                 lr=1e-4, n_epochs=128, patience=10, reg_factor=0.01):
-
+                 test_dataset=None,
+                 criterion=nn.MSELoss(), batch_size=64, lr=1e-4, n_epochs=128,
+                 patience=10,
+                 reg_factor=0.01):
+        """
+        Trainer class to handle training and validation of a neural network model
+        with early stopping.
+        Parameters:
+            :param model (nn.Module): The neural network model to be trained.
+            :param train_dataset (torch.utils.data.Dataset): The training dataset.
+            :param validation_dataset (torch.utils.data.Dataset): The validation dataset.
+            :param test_dataset (torch.utils.data.Dataset, optional): The test dataset.
+            :param criterion (nn.Module, optional): The loss function to be used.
+                Default is nn.MSELoss().
+            :param lr (float, optional): The learning rate for the optimizer.
+                Default is 1e-4.
+            :param num_epochs (int, optional): The number of epochs to train the model.
+                Default is 128.
+            :param patience (int, optional): The number of epochs to wait for
+                improvement before early stopping. Default is 10.
+            :param reg_factor l1 regularization factor the Adam (weight decay).
+                Default is 0.01
+        """
+        self.validation_dataloader = None
+        self.train_dataloader = None
         self.model: nn.Module = model
         self.criterion = criterion
         self.optimizer = torch.optim.Adam(model.parameters(), lr=lr,
@@ -41,25 +49,25 @@ class Trainer:
                                            factor=0.1, patience=5)
         self.n_epochs = n_epochs
         self.patience = patience
+
         self.batch_size = batch_size
-        self.train_dataloader = DataLoader(train_dataset,
-                                           batch_size=self.batch_size,
-                                           shuffle=True)
-        self.validation_dataloader = DataLoader(validation_dataset,
-                                                batch_size=self.batch_size,
-                                                shuffle=False)
+        self.train_dataset = train_dataset
+        self.validation_dataset = validation_dataset
+
         if test_dataset is not None:
             self.test_dataloader = DataLoader(test_dataset,
                                               batch_size=self.batch_size,
                                               shuffle=False)
 
         self.grad_history = []
-        self.max_grad_norm = 1.0  # TODO CHECK THIS!
+        self.max_grad_norm = 1.5
         self.grad_norm_history = []
 
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)
+
+        # self.device = torch.device(
+        #     "cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device('cpu')
+
 
     def record_grad_norm(self):
         for name, param in self.model.named_parameters():
@@ -87,7 +95,7 @@ class Trainer:
         else:
             return best_val_loss, epochs_without_improvement + n_epochs, False
 
-    def train(self):
+    def train(self, rank, world_size, folder=None):
         """
         Trains the model using the provided training and validation dataloaders,
           with early stopping.
@@ -95,12 +103,32 @@ class Trainer:
         Returns:
             nn.Module: The best model observed during training.
         """
-        print(f"Train using {self.device}")
+        # print(f"Train using {self.device}")
+
+        dist.init_process_group(
+            backend='gloo',
+            world_size=world_size,
+            rank=rank,
+            init_method='tcp://127.0.0.1:23456'
+        )
+
+        torch.manual_seed(0)
+        self.model.to(self.device)
+        self.model = DDP(self.model, device_ids=None)
+
+        train_sampler = DistributedSampler(self.train_dataset,
+                                           num_replicas=world_size, rank=rank)
+        self.train_dataloader = DataLoader(self.train_dataset,
+                                           batch_size=self.batch_size,
+                                           sampler=train_sampler)
+        self.validation_dataloader = DataLoader(self.validation_dataset, batch_size=self.batch_size, shuffle=False)
+
         best_val_loss = float('inf')
         epochs_without_improvement = 0
         best_model_state = self.model.state_dict()
         n_epochs_between_val = 5
         for epoch in tqdm(range(self.n_epochs), desc="Training"):
+            train_sampler.set_epoch(epoch)
             self.model.train()
             train_loss = 0.0
 
@@ -119,10 +147,15 @@ class Trainer:
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(),
                                                self.max_grad_norm)
                 self.scheduler.step(train_loss)
-                self.record_gradients()
+                # self.record_gradients()
+                # self.record_grad_norm()
 
             # Compute average training loss for the epoch
             train_loss /= len(self.train_dataloader.dataset)
+
+            if folder is not None and epoch % 10 == 0 and epoch > 0:
+                self.save_model(
+                    f"/content/drive/MyDrive/TransformersModels/{folder}/model_{epoch + 20}.pt")
 
             if (epoch + 1) % n_epochs_between_val == 0 or epoch == (
                     self.n_epochs - 1):
@@ -144,6 +177,7 @@ class Trainer:
                     f'\nEpoch [{epoch + 1}/{self.n_epochs}], Train Loss:'
                     f' {train_loss:.4f}, Validation Loss: {val_loss:.4f}')
 
+        dist.destroy_process_group()
         self.model.load_state_dict(best_model_state)
         print("Training complete!")
         return self.model
@@ -181,6 +215,7 @@ class Trainer:
                 test_targets.append(targets.cpu().numpy())
         return test_predictions, test_targets
 
+
     def record_gradients(self):
         grads = []
         for name, param in self.model.named_parameters():
@@ -188,26 +223,25 @@ class Trainer:
                 grads.append(param.grad.abs().mean().item())
         self.grad_history.append(grads)
 
-    def test(self, test_dataset=None):
+
+    def test(self, test_dataloader=None):
         """
         Tests the model on the test dataset.
 
         Parameters:
-            :param test_dataset (torch.utils.data.Dataset): Dataset for the
-            test.
+            test_dataloader (torch.utils.data.DataLoader): DataLoader for the test dataset.
         """
-        if test_dataset is None:
+        if test_dataloader is None:
             if self.test_dataloader is not None:
                 test_dataloader = self.test_dataloader
             else:
                 raise ValueError("No test dataset provided.")
-        else:
-            test_dataloader = DataLoader(test_dataset)
-
         test_predictions, test_targets = self.__evaluate(test_dataloader)
         test_predictions = np.concatenate(test_predictions, axis=0)
         test_targets = np.concatenate(test_targets, axis=0)
-
+        print("predoctions: ",
+              test_predictions[:5])  # Print the first 5 predictions
+        print("target:", test_targets[:5])  # Print the first 5 targets
         mse = mean_squared_error(test_targets, test_predictions)
         rmse = np.sqrt(mse)
         r2 = r2_score(test_targets, test_predictions)
@@ -216,28 +250,32 @@ class Trainer:
         print(f'MSE: {mse:.4f}, RMSE: {rmse:.4f}, R-squared: {r2:.4f}')
         print(f"pearsonr: {correlation:.4f}, p-value: {p_value:.4f}")
 
-    def save_model(self, filename: str):
+
+    def save_model(self, filename):
         """
         Saves the model to a file.
 
-        :param filename: (str) The name of the file to save the model to.
+        Parameters:
+            filename (str): The name of the file to save the model to.
         """
         torch.save(self.model.state_dict(), filename)
 
+
     def set_train_set(self, train_dataset):
         self.train_dataloader = DataLoader(train_dataset,
-                                           batch_size=self.batch_size,
-                                           shuffle=True)
+                                           batch_size=self.batch_size, shuffle=True)
+
 
     def set_validation_set(self, validation_dataset):
         self.validation_dataloader = DataLoader(validation_dataset,
                                                 batch_size=self.batch_size,
                                                 shuffle=False)
 
+
     def set_test_set(self, test_dataset):
-        self.test_dataloader = DataLoader(test_dataset,
-                                          batch_size=self.batch_size,
+        self.test_dataloader = DataLoader(test_dataset, batch_size=self.batch_size,
                                           shuffle=False)
+
 
     def set_batch_size(self, batch_size):
         self.batch_size = batch_size
@@ -246,8 +284,10 @@ class Trainer:
         if self.test_dataloader is not None:
             self.test_dataloader.batch_size = batch_size
 
+
     def get_grad_history(self):
         return self.grad_history
+
 
     def get_grad_norm_history(self):
         return self.grad_norm_history

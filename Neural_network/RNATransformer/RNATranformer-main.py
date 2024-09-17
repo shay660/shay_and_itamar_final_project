@@ -1,6 +1,7 @@
 from Transformer import TransformerRegressor
 from DataProcessor import Dataprocessor
 from trainer import Trainer
+import torch.multiprocessing as mp
 
 
 SEQUENCE_PATH = "../DeepUTR-main/files/dataset/mRNA_sequences.csv"
@@ -45,8 +46,8 @@ def main():
     trainer = Trainer(model, train_dataset, validation_dataset, test_dataset,
                       batch_size=batch_size, lr=lr, reg_factor=reg_factor)
 
-    model = trainer.train()
-
+    word_size = 4
+    mp.spawn(trainer.train, args=(word_size,), nprocs=word_size, join=True)
     trainer.save_model("files/models")  # TODO
 
 

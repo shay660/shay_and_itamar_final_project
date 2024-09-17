@@ -12,7 +12,9 @@ class Dataprocessor:
         sequences_df: pd.DataFrame = pd.read_csv(sequences_file, index_col=0)
         deg_rates_df: pd.DataFrame = pd.read_csv(deg_rates_file, index_col=0)
 
-        sequence_tensor = self.generate_one_hot_encoding_matrix(
+        # sequence_tensor = self.generate_one_hot_encoding_matrix(
+        #     sequences_df.values)
+        sequence_tensor = self.generate_tokenize_sequence(
             sequences_df.values)
 
         # Compute degradation rates for all sequences
@@ -42,6 +44,7 @@ class Dataprocessor:
         # and to a numpy array
         one_hot_seq = sequence_tensor[indices]
         deg_rates = deg_rates_tensor[indices]
+        deg_rates = deg_rates.reshape(-1, 1)
         return RNADataset(one_hot_seq, deg_rates)
 
     # @staticmethod
@@ -114,6 +117,11 @@ class Dataprocessor:
         # Convert to PyTorch tensors
         return torch.tensor(one_hot_sequences, dtype=torch.float32)
 
+    def generate_tokenize_sequence(self, sequences):
+        tokenized_sequences = np.array(
+            [self.tokenize_sequence(seq[0]) for seq in sequences])
+        return torch.tensor(tokenized_sequences, dtype=torch.long)
+
     def get_train_set(self) -> RNADataset:
         return self.train_set
 
@@ -141,4 +149,12 @@ class Dataprocessor:
             slops[i] = mdl.coef_[0]  # beta-slope
 
         return slops
+
+    @staticmethod
+    def tokenize_sequence(sequence):
+        nucleotide_mapping = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
+        tokenized_sequence = []
+        for nucleotide in sequence:
+            tokenized_sequence.append(nucleotide_mapping[nucleotide])
+        return tokenized_sequence
 
