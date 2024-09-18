@@ -5,8 +5,6 @@ import joblib
 import numpy as np
 import pandas as pd
 
-import load_data
-from main import predict_and_calculate_loss, find_significant_kmers
 
 def count_kmers_according_to_lasso(df: pd.DataFrame, kmers: np.array) ->pd.DataFrame:
     # Initialize a new DataFrame with the same index as the original DataFrame
@@ -31,14 +29,7 @@ def main():
     file.write(f"Run at {timestamp}\n")
     model_features: np.array = model.feature_names_in_
     samples = count_kmers_according_to_lasso(data, model_features)
-    # new_columns = pd.DataFrame({feat: [0] for feat in model_features},
-    #                            index=data.index)
-    # Select only the columns that do not already exist in the data DataFrame
-    # new_columns = new_columns.loc[:, ~new_columns.columns.isin(data.columns)]
-    # Concatenate the new_columns DataFrame with the original data DataFrame
-    # data = pd.concat([new_columns, data], axis=1)
-    # predict_and_calculate_loss(model, data[model.feature_names_in_],
-    #                            data.iloc[:, -3:], name, file)
+
     prediction: np.ndarray = model.predict(samples)
     predictions_df = pd.DataFrame(prediction,
                                   columns=['deg rate', 'x0',
