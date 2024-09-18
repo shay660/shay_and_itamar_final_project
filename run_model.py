@@ -32,7 +32,8 @@ def main():
     Usage:
         $ python script.py <model_file> <data_file> <output_name>
 
-        - model_file: Path to the pre-trained Lasso model (joblib format).
+        - model_file: Path to the pre-trained Lasso model (joblib format
+        version 1.3.2).
         - data_file: Path to the CSV file containing the sequence data.
         - output_name: Name used for the output directory and result files.
     """
