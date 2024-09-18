@@ -94,16 +94,16 @@ def predict_and_calculate_loss(_model, X_test, y_test, _name_of_model: str,
     # mse = mean_squared_error(y_test['degradation rate'], prediction[:, 0])
     # r = np.round(
     #     np.corrcoef(y_test['degradation rate'], prediction[:, 0])[0, 1], 3)
-    # r_squared = np.round(r2_score(y_test, prediction), 3)
+    r_squared = np.round(r2_score(y_test, prediction), 3)
     # file.write(f"MSE of the Linear regression = {round(mse, 3)}\n")
     # file.write(f"r of the Linear regression = {r}\n")
-    # file.write(f"r^2 of the Linear regression = {r_squared}\n")
+    file.write(f"r^2 of the Linear regression = {r_squared}\n")
 
     print("******** Save the results ********", flush=True)
     prediction_df = pd.DataFrame(
         {'Id': y_test.index,
          'True_Degradation_Rate': y_test['degradation rate'],
-         'True_x0': y_test['step_loc'],
+         'True_x0': y_test['x0'],
          'True_t0': y_test['t0'],
          'Predicted_Degradation_Rate': prediction[:, 0],
          'Predicted_x0': prediction[:, 1],
